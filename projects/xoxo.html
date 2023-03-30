@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <style>
         :root{
-            --cell-size: 50em;                              /* width and height of container */
+            --cell-size: 30em;                              /* width and height of container */
             --cell-border: calc(var(--cell-size) / 100);    /* thickness of border between each cell */
             --o-icon-size: calc(var(--cell-size) / 5);      /* overall size of o */
-            --x-icon-size: calc(var(--o-icon-size) * 1.23 );/* slant size of x, overall size should be roughly the same as o */
-            --icon-border: calc(var(--o-icon-size) * 0.21); /* Thickness of x and o */
+            --x-icon-size: calc(var(--o-icon-size) * 1.20 );/* slant size of x, overall size should be roughly the same as o */
+            --icon-border: calc(var(--o-icon-size) * 0.20); /* Thickness of x and o */
         }
 
         #container {
@@ -18,8 +18,8 @@
             height: var(--cell-size);
             grid-template-rows   : 1fr 1fr 1fr;
             grid-template-columns: 1fr 1fr 1fr;
-            border: 1px solid rgba(128, 128, 128, 0.2);
-            border-radius: 5px;
+            /* border: 1px solid rgba(128, 128, 128, 0.2);
+            border-radius: 5px; */
         }
 
         /* Set outline for the board */
@@ -57,25 +57,22 @@
             height: var(--x-icon-size);
             width : var(--x-icon-size);
             transform: rotate(45deg);
-            /* --b: 0px; */
-            /* border: var(--b) solid black; */
         }
         .x::before, .x::after{
             position: absolute;
             content: "";
             background-color: black;
+            border-radius: calc(var(--icon-border) / 4);
         }
         .x::after {
             height: var(--x-icon-size);
             width: var(--icon-border);
             right: calc(calc(var(--x-icon-size)  / 2) - calc(var(--icon-border)/2));
-            /* bottom: calc(-1 * var(--b)); */
         }
         .x::before {
             width: var(--x-icon-size);
             height: var(--icon-border);
             top: calc(calc(var(--x-icon-size)  / 2) - calc(var(--icon-border)/2));
-            /* left: calc(-1 * var(--b)); */
         }
 
         /* styling for o */
@@ -87,6 +84,7 @@
             border-radius: 50%;
         }
     </style>
+
 </head>
 <body>
     <div id="container">
@@ -118,5 +116,27 @@
             <span id="nine"></span>
         </span>
     <div>
+    <script>
+        const ids = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+        let xToPlay = true
+
+        function getNextPlayer() {
+            let nextPlayer = xToPlay ? "x" : "o"
+            xToPlay = !xToPlay
+            return nextPlayer
+        }
+
+        document.addEventListener("mousedown", event => {
+            let sourceNode = event.target
+            if ( !sourceNode.classList.contains("cells") )  return;
+            
+            let childNode = sourceNode.firstElementChild
+            if (!childNode) throw "error"
+
+            if (childNode.classList.contains("x") || childNode.classList.contains("o")) return // move has already been played
+
+            childNode.classList.add( getNextPlayer() )
+        })
+    </script>
 </body>
 </html>
