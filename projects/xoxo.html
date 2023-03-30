@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <style>
+        :root{
+            --cell-size: 50em;                              /* width and height of container */
+            --cell-border: calc(var(--cell-size) / 100);    /* thickness of border between each cell */
+            --o-icon-size: calc(var(--cell-size) / 5);      /* overall size of o */
+            --x-icon-size: calc(var(--o-icon-size) * 1.23 );/* slant size of x, overall size should be roughly the same as o */
+            --icon-border: calc(var(--o-icon-size) * 0.21); /* Thickness of x and o */
+        }
+
+        #container {
+            display: grid;
+            margin: 80px auto;
+            width : var(--cell-size);
+            height: var(--cell-size);
+            grid-template-rows   : 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
+            border: 1px solid rgba(128, 128, 128, 0.2);
+            border-radius: 5px;
+        }
+
+        /* Set outline for the board */
+        .left {
+            border-right: var(--cell-border) solid black;
+        }
+        .right {
+            border-left: var(--cell-border) solid black;
+        }
+        .up {
+            border-bottom: var(--cell-border) solid black;
+        }
+        .down {
+            border-top: var(--cell-border) solid black;
+        }
+
+        /* formatting for each cell */
+        .cells {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .cells > span {
+            box-sizing: border-box;
+        }
+        /* 
+        styling for x 
+        To make an "X", make a "+" within the element..
+        .. and rotate the element by 45 degrees.
+        This is the best method I came up with, and is consistent with every size ;)
+        */
+        .x {
+            display: block;
+            position: relative;
+            height: var(--x-icon-size);
+            width : var(--x-icon-size);
+            transform: rotate(45deg);
+            /* --b: 0px; */
+            /* border: var(--b) solid black; */
+        }
+        .x::before, .x::after{
+            position: absolute;
+            content: "";
+            background-color: black;
+        }
+        .x::after {
+            height: var(--x-icon-size);
+            width: var(--icon-border);
+            right: calc(calc(var(--x-icon-size)  / 2) - calc(var(--icon-border)/2));
+            /* bottom: calc(-1 * var(--b)); */
+        }
+        .x::before {
+            width: var(--x-icon-size);
+            height: var(--icon-border);
+            top: calc(calc(var(--x-icon-size)  / 2) - calc(var(--icon-border)/2));
+            /* left: calc(-1 * var(--b)); */
+        }
+
+        /* styling for o */
+        .o {
+            display: block;
+            height: var(--o-icon-size);
+            width: var(--o-icon-size);
+            border: var(--icon-border) solid black;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <span class="cells left up">
+            <span id="one"></span>
+        </span>
+        <span class="cells up">
+            <span id="two"></span>
+        </span>
+        <span class="cells right up">
+            <span id="three"></span>
+        </span>
+        <span class="cells left ">
+            <span id="four"></span>
+        </span>
+        <span class="cells ">
+            <span id="five"></span>
+        </span>
+        <span class="cells right ">
+            <span id="six"></span>
+        </span>
+        <span class="cells left down">
+            <span id="seven"></span>
+        </span>
+        <span class="cells down">
+            <span id="eight"></span>
+        </span>
+        <span class="cells right down">
+            <span id="nine"></span>
+        </span>
+    <div>
+</body>
+</html>
