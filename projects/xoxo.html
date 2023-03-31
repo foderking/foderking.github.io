@@ -161,16 +161,16 @@
     </div>
     <div id="panel">
       <span class="stats">
-        <span id="player" class="statkey">Player</span>
-        <span class="statvalue">0</span>
+        <span class="statkey">Player</span>
+        <span id="player" class="statvalue">0</span>
       </span>
       <span class="stats">
-        <span id="draw" class="statkey">Draws</span>
-        <span class="statvalue">0</span>
+        <span class="statkey">Draws</span>
+        <span id="draw" class="statvalue">0</span>
       </span>
       <span class="stats">
-        <span id="computer" class="statkey">Computer</span>
-        <span class="statvalue">0</span>
+        <span class="statkey">Computer</span>
+        <span id="computer" class="statvalue">0</span>
       </span>
     </div>
   </div>
@@ -178,6 +178,10 @@
   <script>
     class Utility
     {
+      static drawDom = document.getElementById("draw")
+      static computerDom = document.getElementById("computer")
+      static playerDom = document.getElementById("player")
+
       static cellDictionary = {
         "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9
       }
@@ -188,58 +192,63 @@
         .map(each => each.firstElementChild)
         .sort((a, b) => Utility.cellDictionary[a] > Utility.cellDictionary[b] ? 1 : -1) // make sure the cells are in correct order. Would be important for checking if there's a winner
 
+      static checkWin  = (arr, type) => arr[0].contains(type) && arr[1].contains(type) && arr[2].contains(type)
+      static checkFull = (arr) => Utility.checkWin(arr, "x") || Utility.checkWin(arr, "o")
+
+      static pickThreeHorizontal = (arr, start) => Utility.pickThreeWithStep(arr, start, 1)
+      static pickThreeVertical   = (arr, start) => Utility.pickThreeWithStep(arr, start, 3)
+
+      static pickThreeWithStep = (arr, start = 0, step = 1) => {
+        let tmp = []
+        for (let i = start; tmp.length < 3 && i < arr.length; i += step) {
+          tmp.push(arr[i])
+        }
+        return tmp
+      }
+
+      static isThereWinner = () => {
+        const nodes = Utility.cellNodes.map(each => each.classList)
+        // first horizontal
+        if (Utility.checkFull(Utility.pickThreeHorizontal(nodes, 0)))
+          return true
+        // second horizontal
+        if (Utility.checkFull(Utility.pickThreeHorizontal(nodes, 3)))
+          return true
+        // third horizontal
+        if (Utility.checkFull(Utility.pickThreeHorizontal(nodes, 6)))
+          return true
+        // first vertical
+        if (Utility.checkFull(Utility.pickThreeVertical(nodes, 0)))
+          return true
+        // second vertical
+        if (Utility.checkFull(Utility.pickThreeVertical(nodes, 1)))
+          return true
+        // third vertical
+        if (Utility.checkFull(Utility.pickThreeVertical(nodes, 2)))
+          return true
+        // first diag
+        if (Utility.checkFull([nodes[0], nodes[4], nodes[8]]))
+          return true
+        // second diag
+        if (Utility.checkFull([nodes[2], nodes[4], nodes[6]]))
+          return true
+        return false
+      }
+
+      static isThereStalemate = () => {
+        return Utility.cellNodes
+          .map(each => each.classList)
+          .filter(each => !(each.contains("x") || each.contains("o")))
+          .length <= 0
+          && !Utility.isThereWinner()
+      }
+
       static isGameOver() {
-        const pickThreeWithStep = (arr, start = 0, step = 1) => {
-          let tmp = []
-          for (let i = start; tmp.length < 3 && i < arr.length; i += step) {
-            tmp.push(arr[i])
-          }
-          return tmp
-        }
+        return Utility.isThereWinner() || Utility.isThereStalemate()
+      }
 
-        const checkWin = (arr, type) => arr[0].contains(type) && arr[1].contains(type) && arr[2].contains(type)
-        const checkFull = (arr) => checkWin(arr, "x") || checkWin(arr, "o")
-
-        const pickThreeHorizontal = (arr, start) => pickThreeWithStep(arr, start, 1)
-        const pickThreeVertical = (arr, start) => pickThreeWithStep(arr, start, 3)
-
-        const isThereWinner = () => {
-          const nodes = Utility.cellNodes.map(each => each.classList)
-          // first horizontal
-          if (checkFull(pickThreeHorizontal(nodes, 0)))
-            return true
-          // second horizontal
-          if (checkFull(pickThreeHorizontal(nodes, 3)))
-            return true
-          // third horizontal
-          if (checkFull(pickThreeHorizontal(nodes, 6)))
-            return true
-          // first vertical
-          if (checkFull(pickThreeVertical(nodes, 0)))
-            return true
-          // second vertical
-          if (checkFull(pickThreeVertical(nodes, 1)))
-            return true
-          // third vertical
-          if (checkFull(pickThreeVertical(nodes, 2)))
-            return true
-          // first diag
-          if (checkFull([nodes[0], nodes[4], nodes[8]]))
-            return true
-          // second diag
-          if (checkFull([nodes[2], nodes[4], nodes[6]]))
-            return true
-          return false
-        }
-
-        const isThereStalemate = () => {
-          return Utility.cellNodes
-            .map(each => each.classList)
-            .filter(each => !(each.contains("x") || each.contains("o")))
-            .length <= 0
-        }
-
-        return isThereWinner() || isThereStalemate()
+      static incrementDom(domNode){
+        return parseInt(domNode.innerHTML) + 1
       }
 
       static resetState(ai) {
@@ -289,10 +298,49 @@
 
     }
 
-    function getNextPlayer() {
-      let nextPlayer = xToPlay ? "x" : "o"
-      xToPlay = !xToPlay
-      return nextPlayer
+    class Game
+    {
+      constructor(playerisx=true) {
+        this.xToPlay = playerisx
+        this.playerIsX = playerisx
+      }
+
+      switchPlayer(){
+        this.xToPlay = !this.xToPlay
+      }
+
+      getNextPlayer() {
+        let nextPlayer = this.xToPlay ? "x" : "o"
+        this.switchPlayer()
+        return nextPlayer
+      }
+
+      getIdOfWinner(winnerIsX){
+        return winnerIsX ^ this.playerIsX ? "player" : "computer"
+      }
+
+      getDomOfWinner(winnerId){
+        switch(winnerId){
+          case "player"  : return Utility.playerDom
+          case "computer": return Utility.computerDom
+          default: throw "error"
+        }
+      }
+
+      renderMove(node, moveType) {
+        node.classList.add(moveType)
+        if (Utility.isThereStalemate()) {
+          Utility.drawDom.innerHTML = Utility.incrementDom(Utility.drawDom)
+        }
+        if (Utility.isThereWinner()) {
+          const winner = this.getIdOfWinner(this.xToPlay)
+          const winnerDom = this.getDomOfWinner(winner)
+          winnerDom.innerHTML = Utility.incrementDom(winnerDom)
+            /* fix bug when computers play changes from original when it loses */
+          if (winner==="player")
+            this.switchPlayer()
+        }
+      }
     }
 
     function getValidCellsOnEvent(event) {
@@ -308,12 +356,8 @@
       return childNode
     }
 
-    function renderMove(node, moveType) {
-      node.classList.add(moveType)
-    }
-
-    let xToPlay = true
     const ai = new Computer()
+    const game = new Game(false)
     // const util = new Utility()
 
     document.addEventListener("mousedown", event => {
@@ -325,13 +369,13 @@
         if (!childNode) return
 
         // childNode.classList.add( getNextPlayer() )
-        renderMove(childNode, getNextPlayer())
+        game.renderMove(childNode, game.getNextPlayer())
 
         if (ai.canStillPlay()) {
           const playersMove = childNode.id
           const aiMove = ai.playMove(playersMove)
           let targetNode = document.getElementById(aiMove)
-          renderMove(targetNode, getNextPlayer())
+          game.renderMove(targetNode, game.getNextPlayer())
         }
       }
     })
