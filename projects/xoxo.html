@@ -120,23 +120,71 @@
     <script>
         class Utility
         {
-            static rootNodes = Array
+            static cellDictionary = {
+                "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9
+            }
+
+            static cellNodes = Array
                 .from(document.getElementById("container").children)
                 .filter(each => each.classList.contains("cells"))
+                .map(each => each.firstElementChild)
+                .sort((a, b) => Utility.cellDictionary[a] > Utility.cellDictionary[b] ? 1 : -1) // make sure the cells are in correct order. Would be important for checking if there's a winner
 
             static isGameOver() {
-                const allCells = Utility.rootNodes
-                    .map(each => each.firstElementChild)
-                
-                return allCells
-                    .map(each => each.classList)
-                    .filter(each => !(each.contains("x") || each.contains("o")))
-                    .length <= 0
+                const pickThreeWithStep = (arr, start=0, step=1) => {
+                    let tmp = []
+                    for (let i= start; tmp.length < 3 && i < arr.length ; i += step) {
+                        tmp.push(arr[i])
+                    }
+                    return tmp
+                }
+
+                const pickThreeHorizontal = (arr, start) => pickThreeWithStep(arr, start, 1)
+                const pickThreeVertical   = (arr, start) => pickThreeWithStep(arr, start, 3)
+                const checkWin = (arr, type) => arr[0].contains(type) && arr[1].contains(type) && arr[2].contains(type)
+
+                const isThereWinner = () => {
+                    const nodes = Utility.cellNodes.map(each => each.classList)
+                    // first horizontal
+                    if ( checkWin(pickThreeHorizontal(nodes, 0), "x") || checkWin(pickThreeHorizontal(nodes, 0), "o") )
+                        return true
+                    // second horizontal
+                    if ( checkWin(pickThreeHorizontal(nodes, 3), "x") || checkWin(pickThreeHorizontal(nodes, 3), "o") )
+                        return true
+                    // third horizontal
+                    if ( checkWin(pickThreeHorizontal(nodes, 6), "x") || checkWin(pickThreeHorizontal(nodes, 6), "o") )
+                        return true
+                    // first vertical
+                    if ( checkWin(pickThreeVertical(nodes, 0), "x") || checkWin(pickThreeVertical(nodes, 0), "o") )
+                        return true
+                    // second vertical
+                    if ( checkWin(pickThreeVertical(nodes, 1), "x") || checkWin(pickThreeVertical(nodes, 1), "o") )
+                        return true
+                    // third vertical
+                    if ( checkWin(pickThreeVertical(nodes, 2), "x") || checkWin(pickThreeVertical(nodes, 2), "o") )
+                        return true
+                    // first diag
+                    if ( checkWin([nodes[0], nodes[4], nodes[8]], "x") || checkWin([nodes[0], nodes[4], nodes[8]], "o")  )
+                        return true
+                    // second diag
+                    if ( checkWin([nodes[2], nodes[4], nodes[6]], "x") || checkWin([nodes[2], nodes[4], nodes[6]], "o")  )
+                        return true
+                    return false
+                }
+
+                const isThereStalemate = () => {
+                    return Utility.cellNodes
+                        .map(each => each.classList)
+                        .filter(each => !(each.contains("x") || each.contains("o")))
+                        .length <= 0
+                }
+
+                return isThereWinner() || isThereStalemate()
             }
 
             static resetState(ai) {
-                const cellClasses = Utility.rootNodes
-                    .map(each => each.firstElementChild.classList)
+                const cellClasses = Utility.cellNodes
+                    .map(each => each.classList)
 
                 cellClasses
                     .forEach(each => {
@@ -176,7 +224,7 @@
             }
 
             canStillPlay() {
-                return this.freeSpaces.length > 1
+                return !Utility.isGameOver() && this.freeSpaces.length > 1
             }
 
         }
@@ -210,6 +258,7 @@
 
         document.addEventListener("mousedown", event => {
             if (Utility.isGameOver()) {
+                // setTimeout( () => Utility.resetState(ai), 500)
                 Utility.resetState(ai)
             }
             else {
