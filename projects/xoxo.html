@@ -11,7 +11,7 @@
             --icon-border: calc(var(--o-icon-size) * 0.20); /* Thickness of x and o */
         }
 
-        #container {
+        #board {
             display: grid;
             margin: 80px auto;
             width : var(--cell-size);
@@ -84,39 +84,77 @@
             border: var(--icon-border) solid black;
             border-radius: 50%;
         }
+        /* stats */
+        #panel {
+            width: var(--cell-size);
+            display: flex;
+            margin: 2em auto;
+            justify-content: space-evenly;
+        }
+        .statvalue {
+            font-family: monospace;
+            font-size: 3em;
+        }
+        .statkey {
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-transform: uppercase;
+        }
+        .stats {
+            display: flex;
+            flex-direction: column;
+            flex-basis: calc(var(--cell-size) / 4);
+            text-align: center;
+        }
     </style>
 
 </head>
 <body>
-    <div id="container">
-        <span class="cells left up">
-            <span id="one"></span>
-        </span>
-        <span class="cells up">
-            <span id="two"></span>
-        </span>
-        <span class="cells right up">
-            <span id="three"></span>
-        </span>
-        <span class="cells left ">
-            <span id="four"></span>
-        </span>
-        <span class="cells ">
-            <span id="five"></span>
-        </span>
-        <span class="cells right ">
-            <span id="six"></span>
-        </span>
-        <span class="cells left down">
-            <span id="seven"></span>
-        </span>
-        <span class="cells down">
-            <span id="eight"></span>
-        </span>
-        <span class="cells right down">
-            <span id="nine"></span>
-        </span>
     <div>
+        <div id="board">
+            <span class="cells left up">
+                <span id="one"></span>
+            </span>
+            <span class="cells up">
+                <span id="two"></span>
+            </span>
+            <span class="cells right up">
+                <span id="three"></span>
+            </span>
+            <span class="cells left ">
+                <span id="four"></span>
+            </span>
+            <span class="cells ">
+                <span id="five"></span>
+            </span>
+            <span class="cells right ">
+                <span id="six"></span>
+            </span>
+            <span class="cells left down">
+                <span id="seven"></span>
+            </span>
+            <span class="cells down">
+                <span id="eight"></span>
+            </span>
+            <span class="cells right down">
+                <span id="nine"></span>
+            </span>
+        </div>
+        <div id="panel">
+            <span class="stats">
+                <span id="player" class="statkey">Player</span>
+                <span class="statvalue">0</span>
+            </span>
+            <span class="stats">
+                <span id="draw" class="statkey">Draws</span>
+                <span class="statvalue">0</span>
+            </span>
+            <span class="stats">
+                <span id="computer" class="statkey">Computer</span>
+                <span class="statvalue">0</span>
+            </span>
+        </div>
+    </div>
+
     <script>
         class Utility
         {
@@ -125,7 +163,7 @@
             }
 
             static cellNodes = Array
-                .from(document.getElementById("container").children)
+                .from(document.getElementById("board").children)
                 .filter(each => each.classList.contains("cells"))
                 .map(each => each.firstElementChild)
                 .sort((a, b) => Utility.cellDictionary[a] > Utility.cellDictionary[b] ? 1 : -1) // make sure the cells are in correct order. Would be important for checking if there's a winner
@@ -149,7 +187,7 @@
                     if ( checkWin(pickThreeHorizontal(nodes, 0), "x") || checkWin(pickThreeHorizontal(nodes, 0), "o") )
                         return true
                     // second horizontal
-                    if ( checkWin(pickThreeHorizontal(nodes, 3), "x") || checkWin(pickThreeHorizontal(nodes, 3), "o") )
+                    if (checkWin(pickThreeHorizontal(nodes, 3), "x") || checkWin(pickThreeHorizontal(nodes, 3), " ") )
                         return true
                     // third horizontal
                     if ( checkWin(pickThreeHorizontal(nodes, 6), "x") || checkWin(pickThreeHorizontal(nodes, 6), "o") )
@@ -162,7 +200,7 @@
                         return true
                     // third vertical
                     if ( checkWin(pickThreeVertical(nodes, 2), "x") || checkWin(pickThreeVertical(nodes, 2), "o") )
-                        return true
+                                return true
                     // first diag
                     if ( checkWin([nodes[0], nodes[4], nodes[8]], "x") || checkWin([nodes[0], nodes[4], nodes[8]], "o")  )
                         return true
@@ -258,7 +296,6 @@
 
         document.addEventListener("mousedown", event => {
             if (Utility.isGameOver()) {
-                // setTimeout( () => Utility.resetState(ai), 500)
                 Utility.resetState(ai)
             }
             else {
