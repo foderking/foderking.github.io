@@ -198,6 +198,7 @@
         }
 
         const checkWin = (arr, type) => arr[0].contains(type) && arr[1].contains(type) && arr[2].contains(type)
+        const checkFull = (arr) => checkWin(arr, "x") || checkWin(arr, "o")
 
         const pickThreeHorizontal = (arr, start) => pickThreeWithStep(arr, start, 1)
         const pickThreeVertical = (arr, start) => pickThreeWithStep(arr, start, 3)
@@ -205,28 +206,28 @@
         const isThereWinner = () => {
           const nodes = Utility.cellNodes.map(each => each.classList)
           // first horizontal
-          if (checkWin(pickThreeHorizontal(nodes, 0), "x") || checkWin(pickThreeHorizontal(nodes, 0), "o"))
+          if (checkFull(pickThreeHorizontal(nodes, 0)))
             return true
           // second horizontal
-          if (checkWin(pickThreeHorizontal(nodes, 3), "x") || checkWin(pickThreeHorizontal(nodes, 3), " "))
+          if (checkFull(pickThreeHorizontal(nodes, 3)))
             return true
           // third horizontal
-          if (checkWin(pickThreeHorizontal(nodes, 6), "x") || checkWin(pickThreeHorizontal(nodes, 6), "o"))
+          if (checkFull(pickThreeHorizontal(nodes, 6)))
             return true
           // first vertical
-          if (checkWin(pickThreeVertical(nodes, 0), "x") || checkWin(pickThreeVertical(nodes, 0), "o"))
+          if (checkFull(pickThreeVertical(nodes, 0)))
             return true
           // second vertical
-          if (checkWin(pickThreeVertical(nodes, 1), "x") || checkWin(pickThreeVertical(nodes, 1), "o"))
+          if (checkFull(pickThreeVertical(nodes, 1)))
             return true
           // third vertical
-          if (checkWin(pickThreeVertical(nodes, 2), "x") || checkWin(pickThreeVertical(nodes, 2), "o"))
+          if (checkFull(pickThreeVertical(nodes, 2)))
             return true
           // first diag
-          if (checkWin([nodes[0], nodes[4], nodes[8]], "x") || checkWin([nodes[0], nodes[4], nodes[8]], "o"))
+          if (checkFull([nodes[0], nodes[4], nodes[8]]))
             return true
           // second diag
-          if (checkWin([nodes[2], nodes[4], nodes[6]], "x") || checkWin([nodes[2], nodes[4], nodes[6]], "o"))
+          if (checkFull([nodes[2], nodes[4], nodes[6]]))
             return true
           return false
         }
