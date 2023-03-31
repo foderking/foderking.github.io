@@ -1,318 +1,339 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <style>
-        :root{
-            --cell-size: 30em;                              /* width and height of container */
-            --cell-border: calc(var(--cell-size) / 100);    /* thickness of border between each cell */
-            --o-icon-size: calc(var(--cell-size) / 5);      /* overall size of o */
-            --x-icon-size: calc(var(--o-icon-size) * 1.27 );/* slant size of x, overall size should be roughly the same as o */
-            --icon-border: calc(var(--o-icon-size) * 0.20); /* Thickness of x and o */
-        }
+  <meta charset="utf-8">
+  <style>
+    :root {
+      --cell-size: 30em;
+      /* width and height of container */
+      --cell-border: calc(var(--cell-size) / 100);
+      /* thickness of border between each cell */
+      --o-icon-size: calc(var(--cell-size) / 5);
+      /* overall size of o */
+      --x-icon-size: calc(var(--o-icon-size) * 1.27);
+      /* slant size of x, overall size should be roughly the same as o */
+      --icon-border: calc(var(--o-icon-size) * 0.20);
+      /* Thickness of x and o */
+    }
 
-        #board {
-            display: grid;
-            margin: 80px auto;
-            width : var(--cell-size);
-            height: var(--cell-size);
-            grid-template-rows   : 1fr 1fr 1fr;
-            grid-template-columns: 1fr 1fr 1fr;
-            /* border: 1px solid rgba(128, 128, 128, 0.2);
+    #board {
+      display: grid;
+      margin: 80px auto;
+      width: var(--cell-size);
+      height: var(--cell-size);
+      grid-template-rows: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
+      /* border: 1px solid rgba(128, 128, 128, 0.2);
             border-radius: 5px; */
-        }
+    }
 
-        /* Set outline for the board */
-        .left {
-            border-right: var(--cell-border) solid black;
-        }
-        .right {
-            border-left: var(--cell-border) solid black;
-        }
-        .up {
-            border-bottom: var(--cell-border) solid black;
-        }
-        .down {
-            border-top: var(--cell-border) solid black;
-        }
+    /* Set outline for the board */
+    .left {
+      border-right: var(--cell-border) solid black;
+    }
 
-        /* formatting for each cell */
-        .cells {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        .cells > span {
-            box-sizing: border-box;
-        }
-        /* 
+    .right {
+      border-left: var(--cell-border) solid black;
+    }
+
+    .up {
+      border-bottom: var(--cell-border) solid black;
+    }
+
+    .down {
+      border-top: var(--cell-border) solid black;
+    }
+
+    /* formatting for each cell */
+    .cells {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .cells>span {
+      box-sizing: border-box;
+    }
+
+    /* 
         styling for x 
         To make an "X", make a "+" within the element..
         .. and rotate the element by 45 degrees.
         This is the best method I came up with, and is consistent with every size ;)
         */
-        .x {
-            display: block;
-            position: relative;
-            height: var(--x-icon-size);
-            width : var(--x-icon-size);
-            transform: rotate(45deg);
-        }
-        .x::before, .x::after{
-            position: absolute;
-            content: "";
-            background-color: black;
-            border-radius: calc(var(--icon-border) / 4);
-        }
-        .x::after {
-            height: var(--x-icon-size);
-            width: var(--icon-border);
-            right: calc(calc(var(--x-icon-size)  / 2) - calc(var(--icon-border)/2));
-        }
-        .x::before {
-            width: var(--x-icon-size);
-            height: var(--icon-border);
-            top: calc(calc(var(--x-icon-size)  / 2) - calc(var(--icon-border)/2));
-        }
+    .x {
+      display: block;
+      position: relative;
+      height: var(--x-icon-size);
+      width: var(--x-icon-size);
+      transform: rotate(45deg);
+    }
 
-        /* styling for o */
-        .o {
-            display: block;
-            height: var(--o-icon-size);
-            width: var(--o-icon-size);
-            border: var(--icon-border) solid black;
-            border-radius: 50%;
-        }
-        /* stats */
-        #panel {
-            width: var(--cell-size);
-            display: flex;
-            margin: 2em auto;
-            justify-content: space-evenly;
-        }
-        .statvalue {
-            font-family: monospace;
-            font-size: 3em;
-        }
-        .statkey {
-            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-transform: uppercase;
-        }
-        .stats {
-            display: flex;
-            flex-direction: column;
-            flex-basis: calc(var(--cell-size) / 4);
-            text-align: center;
-        }
-    </style>
+    .x::before,
+    .x::after {
+      position: absolute;
+      content: "";
+      background-color: black;
+      border-radius: calc(var(--icon-border) / 4);
+    }
+
+    .x::after {
+      height: var(--x-icon-size);
+      width: var(--icon-border);
+      right: calc(calc(var(--x-icon-size) / 2) - calc(var(--icon-border)/2));
+    }
+
+    .x::before {
+      width: var(--x-icon-size);
+      height: var(--icon-border);
+      top: calc(calc(var(--x-icon-size) / 2) - calc(var(--icon-border)/2));
+    }
+
+    /* styling for o */
+    .o {
+      display: block;
+      height: var(--o-icon-size);
+      width: var(--o-icon-size);
+      border: var(--icon-border) solid black;
+      border-radius: 50%;
+    }
+
+    /* stats */
+    #panel {
+      width: var(--cell-size);
+      display: flex;
+      margin: 2em auto;
+      justify-content: space-evenly;
+    }
+
+    .statvalue {
+      font-family: monospace;
+      font-size: 3em;
+    }
+
+    .statkey {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-transform: uppercase;
+    }
+
+    .stats {
+      display: flex;
+      flex-direction: column;
+      flex-basis: calc(var(--cell-size) / 4);
+      text-align: center;
+    }
+  </style>
 
 </head>
+
 <body>
-    <div>
-        <div id="board">
-            <span class="cells left up">
-                <span id="one"></span>
-            </span>
-            <span class="cells up">
-                <span id="two"></span>
-            </span>
-            <span class="cells right up">
-                <span id="three"></span>
-            </span>
-            <span class="cells left ">
-                <span id="four"></span>
-            </span>
-            <span class="cells ">
-                <span id="five"></span>
-            </span>
-            <span class="cells right ">
-                <span id="six"></span>
-            </span>
-            <span class="cells left down">
-                <span id="seven"></span>
-            </span>
-            <span class="cells down">
-                <span id="eight"></span>
-            </span>
-            <span class="cells right down">
-                <span id="nine"></span>
-            </span>
-        </div>
-        <div id="panel">
-            <span class="stats">
-                <span id="player" class="statkey">Player</span>
-                <span class="statvalue">0</span>
-            </span>
-            <span class="stats">
-                <span id="draw" class="statkey">Draws</span>
-                <span class="statvalue">0</span>
-            </span>
-            <span class="stats">
-                <span id="computer" class="statkey">Computer</span>
-                <span class="statvalue">0</span>
-            </span>
-        </div>
+  <div>
+    <div id="board">
+      <span class="cells left up">
+        <span id="one"></span>
+      </span>
+      <span class="cells up">
+        <span id="two"></span>
+      </span>
+      <span class="cells right up">
+        <span id="three"></span>
+      </span>
+      <span class="cells left ">
+        <span id="four"></span>
+      </span>
+      <span class="cells ">
+        <span id="five"></span>
+      </span>
+      <span class="cells right ">
+        <span id="six"></span>
+      </span>
+      <span class="cells left down">
+        <span id="seven"></span>
+      </span>
+      <span class="cells down">
+        <span id="eight"></span>
+      </span>
+      <span class="cells right down">
+        <span id="nine"></span>
+      </span>
     </div>
+    <div id="panel">
+      <span class="stats">
+        <span id="player" class="statkey">Player</span>
+        <span class="statvalue">0</span>
+      </span>
+      <span class="stats">
+        <span id="draw" class="statkey">Draws</span>
+        <span class="statvalue">0</span>
+      </span>
+      <span class="stats">
+        <span id="computer" class="statkey">Computer</span>
+        <span class="statvalue">0</span>
+      </span>
+    </div>
+  </div>
 
-    <script>
-        class Utility
-        {
-            static cellDictionary = {
-                "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9
-            }
+  <script>
+    class Utility
+    {
+      static cellDictionary = {
+        "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9
+      }
 
-            static cellNodes = Array
-                .from(document.getElementById("board").children)
-                .filter(each => each.classList.contains("cells"))
-                .map(each => each.firstElementChild)
-                .sort((a, b) => Utility.cellDictionary[a] > Utility.cellDictionary[b] ? 1 : -1) // make sure the cells are in correct order. Would be important for checking if there's a winner
+      static cellNodes = Array
+        .from(document.getElementById("board").children)
+        .filter(each => each.classList.contains("cells"))
+        .map(each => each.firstElementChild)
+        .sort((a, b) => Utility.cellDictionary[a] > Utility.cellDictionary[b] ? 1 : -1) // make sure the cells are in correct order. Would be important for checking if there's a winner
 
-            static isGameOver() {
-                const pickThreeWithStep = (arr, start=0, step=1) => {
-                    let tmp = []
-                    for (let i= start; tmp.length < 3 && i < arr.length ; i += step) {
-                        tmp.push(arr[i])
-                    }
-                    return tmp
-                }
-
-                const pickThreeHorizontal = (arr, start) => pickThreeWithStep(arr, start, 1)
-                const pickThreeVertical   = (arr, start) => pickThreeWithStep(arr, start, 3)
-                const checkWin = (arr, type) => arr[0].contains(type) && arr[1].contains(type) && arr[2].contains(type)
-
-                const isThereWinner = () => {
-                    const nodes = Utility.cellNodes.map(each => each.classList)
-                    // first horizontal
-                    if ( checkWin(pickThreeHorizontal(nodes, 0), "x") || checkWin(pickThreeHorizontal(nodes, 0), "o") )
-                        return true
-                    // second horizontal
-                    if (checkWin(pickThreeHorizontal(nodes, 3), "x") || checkWin(pickThreeHorizontal(nodes, 3), " ") )
-                        return true
-                    // third horizontal
-                    if ( checkWin(pickThreeHorizontal(nodes, 6), "x") || checkWin(pickThreeHorizontal(nodes, 6), "o") )
-                        return true
-                    // first vertical
-                    if ( checkWin(pickThreeVertical(nodes, 0), "x") || checkWin(pickThreeVertical(nodes, 0), "o") )
-                        return true
-                    // second vertical
-                    if ( checkWin(pickThreeVertical(nodes, 1), "x") || checkWin(pickThreeVertical(nodes, 1), "o") )
-                        return true
-                    // third vertical
-                    if ( checkWin(pickThreeVertical(nodes, 2), "x") || checkWin(pickThreeVertical(nodes, 2), "o") )
-                                return true
-                    // first diag
-                    if ( checkWin([nodes[0], nodes[4], nodes[8]], "x") || checkWin([nodes[0], nodes[4], nodes[8]], "o")  )
-                        return true
-                    // second diag
-                    if ( checkWin([nodes[2], nodes[4], nodes[6]], "x") || checkWin([nodes[2], nodes[4], nodes[6]], "o")  )
-                        return true
-                    return false
-                }
-
-                const isThereStalemate = () => {
-                    return Utility.cellNodes
-                        .map(each => each.classList)
-                        .filter(each => !(each.contains("x") || each.contains("o")))
-                        .length <= 0
-                }
-
-                return isThereWinner() || isThereStalemate()
-            }
-
-            static resetState(ai) {
-                const cellClasses = Utility.cellNodes
-                    .map(each => each.classList)
-
-                cellClasses
-                    .forEach(each => {
-                        if (each.contains("x"))
-                            each.remove("x")
-                        if (each.contains("o"))
-                            each.remove("o")
-                    })
-                
-                ai.reset()
-            }
+      static isGameOver() {
+        const pickThreeWithStep = (arr, start = 0, step = 1) => {
+          let tmp = []
+          for (let i = start; tmp.length < 3 && i < arr.length; i += step) {
+            tmp.push(arr[i])
+          }
+          return tmp
         }
 
-        class Computer
-        {
-            static allIds = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+        const checkWin = (arr, type) => arr[0].contains(type) && arr[1].contains(type) && arr[2].contains(type)
 
-            constructor () {
-                this.reset()
-            }
+        const pickThreeHorizontal = (arr, start) => pickThreeWithStep(arr, start, 1)
+        const pickThreeVertical = (arr, start) => pickThreeWithStep(arr, start, 3)
 
-            reset () {
-                this.freeSpaces = Computer.allIds.slice()
-            }
-
-            playMove(playersMove) {
-                const deleteMove = (moves, target) => moves.filter(each => each !== target)
-
-                if (!this.freeSpaces.includes(playersMove)) throw "players move not found"
-                this.freeSpaces = deleteMove(this.freeSpaces, playersMove) // removes players move from available moves
-
-                let nextMoveId = Math.floor(Math.random() * this.freeSpaces.length)
-                let nextMove   = this.freeSpaces[nextMoveId]
-                this.freeSpaces = deleteMove(this.freeSpaces, nextMove)  // removes computers move from available moves
-
-                return nextMove
-            }
-
-            canStillPlay() {
-                return !Utility.isGameOver() && this.freeSpaces.length > 1
-            }
-
+        const isThereWinner = () => {
+          const nodes = Utility.cellNodes.map(each => each.classList)
+          // first horizontal
+          if (checkWin(pickThreeHorizontal(nodes, 0), "x") || checkWin(pickThreeHorizontal(nodes, 0), "o"))
+            return true
+          // second horizontal
+          if (checkWin(pickThreeHorizontal(nodes, 3), "x") || checkWin(pickThreeHorizontal(nodes, 3), " "))
+            return true
+          // third horizontal
+          if (checkWin(pickThreeHorizontal(nodes, 6), "x") || checkWin(pickThreeHorizontal(nodes, 6), "o"))
+            return true
+          // first vertical
+          if (checkWin(pickThreeVertical(nodes, 0), "x") || checkWin(pickThreeVertical(nodes, 0), "o"))
+            return true
+          // second vertical
+          if (checkWin(pickThreeVertical(nodes, 1), "x") || checkWin(pickThreeVertical(nodes, 1), "o"))
+            return true
+          // third vertical
+          if (checkWin(pickThreeVertical(nodes, 2), "x") || checkWin(pickThreeVertical(nodes, 2), "o"))
+            return true
+          // first diag
+          if (checkWin([nodes[0], nodes[4], nodes[8]], "x") || checkWin([nodes[0], nodes[4], nodes[8]], "o"))
+            return true
+          // second diag
+          if (checkWin([nodes[2], nodes[4], nodes[6]], "x") || checkWin([nodes[2], nodes[4], nodes[6]], "o"))
+            return true
+          return false
         }
 
-        function getNextPlayer() {
-            let nextPlayer = xToPlay ? "x" : "o"
-            xToPlay = !xToPlay
-            return nextPlayer
+        const isThereStalemate = () => {
+          return Utility.cellNodes
+            .map(each => each.classList)
+            .filter(each => !(each.contains("x") || each.contains("o")))
+            .length <= 0
         }
 
-        function getValidCellsOnEvent(event) {
-            let sourceNode = event.target
-            // filter when cells arent clicked
-            if ( !sourceNode.classList.contains("cells") )  return null;
-            
-            let childNode = sourceNode.firstElementChild
-            // filter when an invalid child node is clicked
-            if (!childNode) throw "error"
-            if (childNode.classList.contains("x") || childNode.classList.contains("o")) return null// move has already been played
+        return isThereWinner() || isThereStalemate()
+      }
 
-            return childNode
+      static resetState(ai) {
+        const cellClasses = Utility.cellNodes
+          .map(each => each.classList)
+
+        cellClasses
+          .forEach(each => {
+            if (each.contains("x"))
+              each.remove("x")
+            if (each.contains("o"))
+              each.remove("o")
+          })
+
+        ai.reset()
+      }
+    }
+
+    class Computer
+    {
+      static allIds = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+
+      constructor() {
+        this.reset()
+      }
+
+      reset() {
+        this.freeSpaces = Computer.allIds.slice()
+      }
+
+      playMove(playersMove) {
+        const deleteMove = (moves, target) => moves.filter(each => each !== target)
+
+        if (!this.freeSpaces.includes(playersMove)) throw "players move not found"
+        this.freeSpaces = deleteMove(this.freeSpaces, playersMove) // removes players move from available moves
+
+        let nextMoveId = Math.floor(Math.random() * this.freeSpaces.length)
+        let nextMove = this.freeSpaces[nextMoveId]
+        this.freeSpaces = deleteMove(this.freeSpaces, nextMove)  // removes computers move from available moves
+
+        return nextMove
+      }
+
+      canStillPlay() {
+        return !Utility.isGameOver() && this.freeSpaces.length > 1
+      }
+
+    }
+
+    function getNextPlayer() {
+      let nextPlayer = xToPlay ? "x" : "o"
+      xToPlay = !xToPlay
+      return nextPlayer
+    }
+
+    function getValidCellsOnEvent(event) {
+      let sourceNode = event.target
+      // filter when cells arent clicked
+      if (!sourceNode.classList.contains("cells")) return null;
+
+      let childNode = sourceNode.firstElementChild
+      // filter when an invalid child node is clicked
+      if (!childNode) throw "error"
+      if (childNode.classList.contains("x") || childNode.classList.contains("o")) return null// move has already been played
+
+      return childNode
+    }
+
+    function renderMove(node, moveType) {
+      node.classList.add(moveType)
+    }
+
+    let xToPlay = true
+    const ai = new Computer()
+    // const util = new Utility()
+
+    document.addEventListener("mousedown", event => {
+      if (Utility.isGameOver()) {
+        Utility.resetState(ai)
+      }
+      else {
+        let childNode = getValidCellsOnEvent(event)
+        if (!childNode) return
+
+        // childNode.classList.add( getNextPlayer() )
+        renderMove(childNode, getNextPlayer())
+
+        if (ai.canStillPlay()) {
+          const playersMove = childNode.id
+          const aiMove = ai.playMove(playersMove)
+          let targetNode = document.getElementById(aiMove)
+          renderMove(targetNode, getNextPlayer())
         }
-
-        function renderMove(node, moveType){
-            node.classList.add(moveType)
-        }
-        
-        let xToPlay = true
-        const ai = new Computer()
-        // const util = new Utility()
-
-        document.addEventListener("mousedown", event => {
-            if (Utility.isGameOver()) {
-                Utility.resetState(ai)
-            }
-            else {
-                let childNode = getValidCellsOnEvent(event)
-                if (!childNode) return
-
-                // childNode.classList.add( getNextPlayer() )
-                renderMove(childNode, getNextPlayer())
-
-                if (ai.canStillPlay()) {
-                    const playersMove = childNode.id
-                    const aiMove = ai.playMove(playersMove)
-                    let targetNode = document.getElementById(aiMove)
-                    renderMove(targetNode, getNextPlayer())
-                }
-            }
-        })
-    </script>
+      }
+    })
+  </script>
 </body>
 </html>
