@@ -118,10 +118,48 @@
         </span>
     <div>
     <script>
+        class Utility
+        {
+            static rootNodes = Array
+                .from(document.getElementById("container").children)
+                .filter(each => each.classList.contains("cells"))
 
-        class Computer {
+            static isGameOver() {
+                const allCells = Utility.rootNodes
+                    .map(each => each.firstElementChild)
+                
+                return allCells
+                    .map(each => each.classList)
+                    .filter(each => !(each.contains("x") || each.contains("o")))
+                    .length <= 0
+            }
+
+            static resetState(ai) {
+                const cellClasses = Utility.rootNodes
+                    .map(each => each.firstElementChild.classList)
+
+                cellClasses
+                    .forEach(each => {
+                        if (each.contains("x"))
+                            each.remove("x")
+                        if (each.contains("o"))
+                            each.remove("o")
+                    })
+                
+                ai.reset()
+            }
+        }
+
+        class Computer
+        {
+            static allIds = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+
             constructor () {
-                this.freeSpaces = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+                this.reset()
+            }
+
+            reset () {
+                this.freeSpaces = Computer.allIds.slice()
             }
 
             playMove(playersMove) {
@@ -168,19 +206,25 @@
         
         let xToPlay = true
         const ai = new Computer()
+        // const util = new Utility()
 
         document.addEventListener("mousedown", event => {
-            let childNode = getValidCellsOnEvent(event)
-            if (!childNode) return
+            if (Utility.isGameOver()) {
+                Utility.resetState(ai)
+            }
+            else {
+                let childNode = getValidCellsOnEvent(event)
+                if (!childNode) return
 
-            // childNode.classList.add( getNextPlayer() )
-            renderMove(childNode, getNextPlayer())
+                // childNode.classList.add( getNextPlayer() )
+                renderMove(childNode, getNextPlayer())
 
-            if (ai.canStillPlay()) {
-                const playersMove = childNode.id
-                const aiMove = ai.playMove(playersMove)
-                let targetNode = document.getElementById(aiMove)
-                renderMove(targetNode, getNextPlayer())
+                if (ai.canStillPlay()) {
+                    const playersMove = childNode.id
+                    const aiMove = ai.playMove(playersMove)
+                    let targetNode = document.getElementById(aiMove)
+                    renderMove(targetNode, getNextPlayer())
+                }
             }
         })
     </script>
