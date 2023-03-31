@@ -7,7 +7,7 @@
             --cell-size: 30em;                              /* width and height of container */
             --cell-border: calc(var(--cell-size) / 100);    /* thickness of border between each cell */
             --o-icon-size: calc(var(--cell-size) / 5);      /* overall size of o */
-            --x-icon-size: calc(var(--o-icon-size) * 1.20 );/* slant size of x, overall size should be roughly the same as o */
+            --x-icon-size: calc(var(--o-icon-size) * 1.27 );/* slant size of x, overall size should be roughly the same as o */
             --icon-border: calc(var(--o-icon-size) * 0.20); /* Thickness of x and o */
         }
 
@@ -41,6 +41,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
         .cells > span {
             box-sizing: border-box;
@@ -117,8 +118,30 @@
         </span>
     <div>
     <script>
-        const ids = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
-        let xToPlay = true
+
+        class Computer {
+            constructor () {
+                this.freeSpaces = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+            }
+
+            playMove(playersMove) {
+                const deleteMove = (moves, target) => moves.filter(each => each !== target)
+
+                if (!this.freeSpaces.includes(playersMove)) throw "players move not found"
+                this.freeSpaces = deleteMove(this.freeSpaces, playersMove) // removes players move from available moves
+
+                let nextMoveId = Math.floor(Math.random() * this.freeSpaces.length)
+                let nextMove   = this.freeSpaces[nextMoveId]
+                this.freeSpaces = deleteMove(this.freeSpaces, nextMove)  // removes computers move from available moves
+
+                return nextMove
+            }
+
+            canStillPlay() {
+                return this.freeSpaces.length > 1
+            }
+
+        }
 
         function getNextPlayer() {
             let nextPlayer = xToPlay ? "x" : "o"
@@ -126,16 +149,39 @@
             return nextPlayer
         }
 
-        document.addEventListener("mousedown", event => {
+        function getValidCellsOnEvent(event) {
             let sourceNode = event.target
-            if ( !sourceNode.classList.contains("cells") )  return;
+            // filter when cells arent clicked
+            if ( !sourceNode.classList.contains("cells") )  return null;
             
             let childNode = sourceNode.firstElementChild
+            // filter when an invalid child node is clicked
             if (!childNode) throw "error"
+            if (childNode.classList.contains("x") || childNode.classList.contains("o")) return null// move has already been played
 
-            if (childNode.classList.contains("x") || childNode.classList.contains("o")) return // move has already been played
+            return childNode
+        }
 
-            childNode.classList.add( getNextPlayer() )
+        function renderMove(node, moveType){
+            node.classList.add(moveType)
+        }
+        
+        let xToPlay = true
+        const ai = new Computer()
+
+        document.addEventListener("mousedown", event => {
+            let childNode = getValidCellsOnEvent(event)
+            if (!childNode) return
+
+            // childNode.classList.add( getNextPlayer() )
+            renderMove(childNode, getNextPlayer())
+
+            if (ai.canStillPlay()) {
+                const playersMove = childNode.id
+                const aiMove = ai.playMove(playersMove)
+                let targetNode = document.getElementById(aiMove)
+                renderMove(targetNode, getNextPlayer())
+            }
         })
     </script>
 </body>
