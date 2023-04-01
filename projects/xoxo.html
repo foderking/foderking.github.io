@@ -5,16 +5,16 @@
   <meta charset="utf-8">
   <style>
     :root {
-      --cell-size: 30em;
       /* width and height of container */
-      --cell-border: calc(var(--cell-size) / 100);
+      --cell-size: 30em;
       /* thickness of border between each cell */
-      --o-icon-size: calc(var(--cell-size) / 5);
+      --cell-border: calc(var(--cell-size) / 100);
       /* overall size of o */
-      --x-icon-size: calc(var(--o-icon-size) * 1.27);
+      --o-icon-size: calc(var(--cell-size) / 5);
       /* slant size of x, overall size should be roughly the same as o */
-      --icon-border: calc(var(--o-icon-size) * 0.20);
+      --x-icon-size: calc(var(--o-icon-size) * 1.27);
       /* Thickness of x and o */
+      --icon-border: calc(var(--o-icon-size) * 0.20);
     }
 
     #board {
@@ -212,15 +212,15 @@
   <script>
     class Utility
     {
-      static drawDom = document.getElementById("draw")
-      static computerDom = document.getElementById("computer")
-      static playerDom = document.getElementById("player")
-
       static cellDictionary = {
         "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9
       }
 
-      static cellNodes = Array
+      static drawDom     = document.getElementById("draw")
+      static computerDom = document.getElementById("computer")
+      static playerDom   = document.getElementById("player")
+
+      static cellsDom = Array
         .from(document.getElementById("board").children)
         .filter(each => each.classList.contains("cells"))
         .map(each => each.firstElementChild)
@@ -240,49 +240,33 @@
         return tmp
       }
 
-      static getNodes(type) {
-        const nodes = Utility.cellNodes.map(each => each.classList)
+      static getNodesFromType(type) {
+        const allNodes = Utility.cellsDom.map(each => each.classList)
 
         switch (type)
         {
-          case "H1": return Utility.pickThreeHorizontal(nodes, 0)
-          case "H2": return Utility.pickThreeHorizontal(nodes, 3)
-          case "H3": return Utility.pickThreeHorizontal(nodes, 6)
-          case "V1": return Utility.pickThreeVertical(nodes, 0)
-          case "V2": return Utility.pickThreeVertical(nodes, 1)
-          case "V3": return Utility.pickThreeVertical(nodes, 2)
-          case "D1": return [nodes[0], nodes[4], nodes[8]]
-          case "D2": return [nodes[2], nodes[4], nodes[6]]
+          case "H1": return Utility.pickThreeHorizontal(allNodes, 0)
+          case "H2": return Utility.pickThreeHorizontal(allNodes, 3)
+          case "H3": return Utility.pickThreeHorizontal(allNodes, 6)
+          case "V1": return Utility.pickThreeVertical(allNodes, 0)
+          case "V2": return Utility.pickThreeVertical(allNodes, 1)
+          case "V3": return Utility.pickThreeVertical(allNodes, 2)
+          case "D1": return [allNodes[0], allNodes[4], allNodes[8]]
+          case "D2": return [allNodes[2], allNodes[4], allNodes[6]]
           default: throw "error"
         }
       }
 
       static isThereWinnerFull = () => {
-        const nodes = Utility.cellNodes.map(each => each.classList)
-        // first horizontal
-        if (Utility.checkFull(Utility.pickThreeHorizontal(nodes, 0)))
-          return [true, "H1"]
-        // second horizontal
-        if (Utility.checkFull(Utility.pickThreeHorizontal(nodes, 3)))
-          return [true, "H2"]
-        // third horizontal
-        if (Utility.checkFull(Utility.pickThreeHorizontal(nodes, 6)))
-          return [true, "H3"]
-        // first vertical
-        if (Utility.checkFull(Utility.pickThreeVertical(nodes, 0)))
-          return [true, "V1"]
-        // second vertical
-        if (Utility.checkFull(Utility.pickThreeVertical(nodes, 1)))
-          return [true, "V2"]
-        // third vertical
-        if (Utility.checkFull(Utility.pickThreeVertical(nodes, 2)))
-          return [true, "V3"]
-        // first diag
-        if (Utility.checkFull([nodes[0], nodes[4], nodes[8]]))
-          return [true, "D1"]
-        // second diag
-        if (Utility.checkFull([nodes[2], nodes[4], nodes[6]]))
-          return [true, "D2"]
+        const nodes = Utility.cellsDom.map(each => each.classList)
+        if (Utility.checkFull(Utility.getNodesFromType("H1"))) return [true, "H1"]
+        if (Utility.checkFull(Utility.getNodesFromType("H2"))) return [true, "H2"]
+        if (Utility.checkFull(Utility.getNodesFromType("H3"))) return [true, "H3"]
+        if (Utility.checkFull(Utility.getNodesFromType("V1"))) return [true, "V1"]
+        if (Utility.checkFull(Utility.getNodesFromType("V2"))) return [true, "V2"]
+        if (Utility.checkFull(Utility.getNodesFromType("V3"))) return [true, "V3"]
+        if (Utility.checkFull(Utility.getNodesFromType("D1"))) return [true, "D1"]
+        if (Utility.checkFull(Utility.getNodesFromType("D2"))) return [true, "D2"]
         return [false, ""]
       }
 
@@ -291,7 +275,7 @@
       }
 
       static isThereStalemate = () => {
-        return Utility.cellNodes
+        return Utility.cellsDom
           .map(each => each.classList)
           .filter(each => !(each.contains("x") || each.contains("o")))
           .length <= 0
@@ -304,33 +288,6 @@
 
       static incrementDom(domNode){
         return parseInt(domNode.innerHTML) + 1
-      }
-
-      static resetState(ai) {
-        const cellClasses = Utility.cellNodes
-          .map(each => each.classList)
-
-        cellClasses
-          .forEach(each => {
-            if (each.contains("x"))
-              each.remove("x")
-            if (each.contains("o"))
-              each.remove("o")
-            if (each.contains("win"))
-              each.remove("win")
-          })
-        
-        // // reset all animation classes
-        // // Utility.winTypes
-        // ["x", "o", "win"]
-        //   .forEach(t => {
-        //     cellClasses.forEach(each => {
-        //       if (each.contains(t))
-        //         each.remove(t)
-        //     })
-        //   })
-
-        ai.reset()
       }
     }
 
@@ -370,6 +327,7 @@
         this.xToPlay = playerisx
         this.playerIsX = playerisx
         this.botResponseTime = 300
+        this.ai = new Computer()
       }
 
       switchPlayer(){
@@ -394,63 +352,86 @@
         }
       }
 
+      getValidPlayerMove(event) {
+        let sourceNode = event.target
+        // filter when cells arent clicked
+        if (!sourceNode.classList.contains("cells")) return null;
+
+        // filter when an invalid child node is clicked
+        let childNode = sourceNode.firstElementChild
+        if (!childNode) throw "error"
+        if (childNode.classList.contains("x") || childNode.classList.contains("o")) return null// move has already been played
+
+        return childNode
+      }
+
+      getValidComputerMove(playerTargetNode){
+          const playersMove = playerTargetNode.id
+          const aiMove = this.ai.playMove(playersMove)
+          return document.getElementById(aiMove)
+      }
+
+      AICanStillPlay(){
+        return this.ai.canStillPlay()
+      }
+
       renderMove(node, moveType, delayMove=false) {
         // delay move for bot
         if (delayMove) return setTimeout(() => this.renderMove(node, moveType), this.botResponseTime);
-
+        // add animation class
         node.classList.add(moveType)
         if (Utility.isThereStalemate()) {
+          // increase draw counter if there is a draw
           Utility.drawDom.innerHTML = Utility.incrementDom(Utility.drawDom)
         }
         if (Utility.isThereWinner()) {
+          //  increase winner counter if there is a winner
           const winner = this.getIdOfWinner(this.xToPlay)
           const winnerDom = this.getDomOfWinner(winner)
           winnerDom.innerHTML = Utility.incrementDom(winnerDom)
+          // add animation class for winning
           const winType = Utility.isThereWinnerFull()[1]
-          const winNodesClass = Utility.getNodes(winType)
-
-          console.log(winType)
+          const winNodesClass = Utility.getNodesFromType(winType)
           winNodesClass
             .map(each => each.add("win"))
+          console.log(winType)
             /* fix bug when computers play changes from original when it loses */
           if (winner==="player")
             this.switchPlayer()
         }
+
+      }
+
+      resetState() {
+        // reset all animation classes
+        Utility.cellsDom
+          .map(each => each.classList)
+          .forEach(each => {
+            if (each.contains("x"))
+              each.remove("x")
+            if (each.contains("o"))
+              each.remove("o")
+            if (each.contains("win"))
+              each.remove("win")
+          })
+        // reset computers state
+        this.ai.reset()
       }
     }
 
-    function getValidCellsOnEvent(event) {
-      let sourceNode = event.target
-      // filter when cells arent clicked
-      if (!sourceNode.classList.contains("cells")) return null;
-
-      let childNode = sourceNode.firstElementChild
-      // filter when an invalid child node is clicked
-      if (!childNode) throw "error"
-      if (childNode.classList.contains("x") || childNode.classList.contains("o")) return null// move has already been played
-
-      return childNode
-    }
-
-    const ai = new Computer()
     const game = new Game(false)
-    // const util = new Utility()
 
     document.addEventListener("mousedown", event => {
       if (Utility.isGameOver()) {
-        Utility.resetState(ai)
+        game.resetState()
       }
       else {
-        let childNode = getValidCellsOnEvent(event)
-        if (!childNode) return
+        let playerTargetNode = game.getValidPlayerMove(event)
+        if (!playerTargetNode) return
+        game.renderMove(playerTargetNode, game.getNextPlayer())
 
-        // childNode.classList.add( getNextPlayer() )
-        game.renderMove(childNode, game.getNextPlayer())
-
-        if (ai.canStillPlay()) {
-          const playersMove = childNode.id
-          const aiMove = ai.playMove(playersMove)
-          let targetNode = document.getElementById(aiMove)
+        if (game.AICanStillPlay()) {
+          let targetNode = game.getValidComputerMove(playerTargetNode)
           game.renderMove(targetNode, game.getNextPlayer(), true)
         }
       }
