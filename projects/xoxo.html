@@ -242,8 +242,12 @@
         .map(each => each.firstElementChild)
         .sort((a, b) => Utility.cellDictionary[a.id] > Utility.cellDictionary[b.id] ? 1 : -1) // make sure the cells are in correct order. Would be important for checking if there's a winner
 
-      static checkWin  = (arr, type) => arr[0].contains(type) && arr[1].contains(type) && arr[2].contains(type)
-      static checkFull = (arr) => Utility.checkWin(arr, "x") || Utility.checkWin(arr, "o")
+      // (arr, i) => arr[i].contains
+      static checkWin  = (arr, type, checkFunc) => 
+        checkFunc(arr, 0)(type) && checkFunc(arr, 1)(type) && checkFunc(arr, 2)(type)
+      // static checkWin  = (arr, type) => arr[0].contains(type) && arr[1].contains(type) && arr[2].contains(type)
+      static checkFull = (arr, checkFunc = Utility.defaultCheckFunc ) => 
+        Utility.checkWin(arr, "x", checkFunc) || Utility.checkWin(arr, "o", checkFunc)
 
       static pickThreeHorizontal = (arr, start) => Utility.pickThreeWithStep(arr, start, 1)
       static pickThreeVertical   = (arr, start) => Utility.pickThreeWithStep(arr, start, 3)
@@ -256,6 +260,14 @@
         return tmp
       }
 
+      static defaultCheckFunc = (arr, i) => {
+        return (zz) => arr[i].contains(zz)
+      }
+
+      static serializedCheckFunc = (arr, i) => {
+        return (zz) => arr[i] === zz
+      }
+
       static serializeCells() {
         return Utility.cellsDom
           .map(each => Array.from(each.classList))
@@ -266,8 +278,8 @@
           .flatMap(each => each)
       }
 
-      static getNodesFromType(type, getFunc = (e) => e.classList) {
-        const allNodes = Utility.cellsDom.map(getFunc)
+      static getNodesFromType(type, getFunc = (e) => e.classList, nodes = Utility.cellsDom) {
+        const allNodes = nodes.map(getFunc)
         switch (type)
         {
           case "H1": return Utility.pickThreeHorizontal(allNodes, 0)
@@ -283,19 +295,10 @@
       }
 
       static isThereWinnerFull = () => {
-        // const nodes = Utility.cellsDom.map(each => each.classList)
-
         for (let eachType of Utility.winTypes) {
           if (Utility.checkFull(Utility.getNodesFromType(eachType)))
             return [true, eachType]
         }
-        // if (Utility.checkFull(Utility.getNodesFromType("H2"))) return [true, "H2"]
-        // if (Utility.checkFull(Utility.getNodesFromType("H3"))) return [true, "H3"]
-        // if (Utility.checkFull(Utility.getNodesFromType("V1"))) return [true, "V1"]
-        // if (Utility.checkFull(Utility.getNodesFromType("V2"))) return [true, "V2"]
-        // if (Utility.checkFull(Utility.getNodesFromType("V3"))) return [true, "V3"]
-        // if (Utility.checkFull(Utility.getNodesFromType("D1"))) return [true, "D1"]
-        // if (Utility.checkFull(Utility.getNodesFromType("D2"))) return [true, "D2"]
         return [false, ""]
       }
 
@@ -435,7 +438,13 @@
           winNodesClass
             .map(each => each.add("win"))
           console.log(winType)
-          console.log(Utility.cellsDom, Utility.getNodesFromType(winType, each => each))
+
+          console.log(
+            // Utility.cellsDom,
+            Utility.getNodesFromType(winType),
+            Utility.getNodesFromType(winType, each => each, Utility.serializeCells()),
+            Utility.checkFull(Utility.getNodesFromType(winType, each => each, Utility.serializeCells()), Utility.serializedCheckFunc)
+          )
             /* fix bug when computers play changes from original when it loses */
           if (winner==="player")
             this.switchPlayer()
