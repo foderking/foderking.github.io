@@ -16,15 +16,27 @@
       /* Thickness of x and o */
       --icon-border: calc(var(--o-icon-size) * 0.20);
     }
+    /* responsive shit */
+    @media screen and (max-width: 500px) {
+      :root {
+        /* width and height of container */
+        --cell-size: 45em;
+        
+      }
+      body{
+        background-color: red;
+      }
+    }
 
     #board {
       display: grid;
-      margin: 80px auto;
+      margin: calc(var(--cell-size) / 6) auto;
+      margin-top: calc(var(--cell-size) / 3);
       width: var(--cell-size);
       height: var(--cell-size);
       grid-template-rows: 1fr 1fr 1fr;
       grid-template-columns: 1fr 1fr 1fr;
-      /* border: 1px solid rgba(128, 128, 128, 0.2);
+      /* border: 5px solid rgba(128, 128, 128, 0.2);
             border-radius: 5px; */
     }
 
@@ -110,7 +122,7 @@
 
     .statvalue {
       font-family: monospace;
-      font-size: 3em;
+      font-size: calc(var(--cell-size) / 10);
     }
 
     .statkey {
