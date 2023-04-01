@@ -124,6 +124,27 @@
       flex-basis: calc(var(--cell-size) / 4);
       text-align: center;
     }
+    /* animation */
+    @keyframes expand {
+      0% {
+        opacity: 0;
+        transform: scale(0.3 rotate(40deg));
+      }
+      50%{
+        opacity: 0.8;
+      }
+      80% {
+        transform: scale(1.03) rotate(45deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(45deg);
+      }
+    }
+    
+    .x, .o {
+      animation: expand 0.13s linear;
+    }
   </style>
 
 </head>
@@ -288,7 +309,6 @@
         let nextMoveId = Math.floor(Math.random() * this.freeSpaces.length)
         let nextMove = this.freeSpaces[nextMoveId]
         this.freeSpaces = deleteMove(this.freeSpaces, nextMove)  // removes computers move from available moves
-
         return nextMove
       }
 
@@ -303,6 +323,7 @@
       constructor(playerisx=true) {
         this.xToPlay = playerisx
         this.playerIsX = playerisx
+        this.botResponseTime = 300
       }
 
       switchPlayer(){
@@ -327,7 +348,10 @@
         }
       }
 
-      renderMove(node, moveType) {
+      renderMove(node, moveType, delayMove=false) {
+        // delay move for bot
+        if (delayMove) return setTimeout(() => this.renderMove(node, moveType), this.botResponseTime);
+
         node.classList.add(moveType)
         if (Utility.isThereStalemate()) {
           Utility.drawDom.innerHTML = Utility.incrementDom(Utility.drawDom)
@@ -375,7 +399,7 @@
           const playersMove = childNode.id
           const aiMove = ai.playMove(playersMove)
           let targetNode = document.getElementById(aiMove)
-          game.renderMove(targetNode, game.getNextPlayer())
+          game.renderMove(targetNode, game.getNextPlayer(), true)
         }
       }
     })
