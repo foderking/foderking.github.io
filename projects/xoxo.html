@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
   <style>
     :root {
       /* width and height of container */
@@ -17,15 +18,16 @@
       --icon-border: calc(var(--o-icon-size) * 0.20);
     }
     /* responsive shit */
-    @media screen and (max-width: 500px) {
+    @media screen and (max-width:500px) {
       :root {
         /* width and height of container */
-        --cell-size: 45em;
+        --cell-size: 40em;
+        --o-icon-size: calc(var(--cell-size) / 4.5);
         
       }
-      body{
-        background-color: red;
-      }
+      /* body{ */
+        /* background-color: red; */
+      /* } */
     }
 
     #board {
