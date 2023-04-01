@@ -145,6 +145,19 @@
     .x, .o {
       animation: expand 0.13s linear;
     }
+    @keyframes blick {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+      
+    }
+    .win {
+      animation: blick 0.8s ease-in-out;
+      animation-iteration-count: 2;
+    }
   </style>
 
 </head>
@@ -227,33 +240,54 @@
         return tmp
       }
 
-      static isThereWinner = () => {
+      static getNodes(type) {
+        const nodes = Utility.cellNodes.map(each => each.classList)
+
+        switch (type)
+        {
+          case "H1": return Utility.pickThreeHorizontal(nodes, 0)
+          case "H2": return Utility.pickThreeHorizontal(nodes, 3)
+          case "H3": return Utility.pickThreeHorizontal(nodes, 6)
+          case "V1": return Utility.pickThreeVertical(nodes, 0)
+          case "V2": return Utility.pickThreeVertical(nodes, 1)
+          case "V3": return Utility.pickThreeVertical(nodes, 2)
+          case "D1": return [nodes[0], nodes[4], nodes[8]]
+          case "D2": return [nodes[2], nodes[4], nodes[6]]
+          default: throw "error"
+        }
+      }
+
+      static isThereWinnerFull = () => {
         const nodes = Utility.cellNodes.map(each => each.classList)
         // first horizontal
         if (Utility.checkFull(Utility.pickThreeHorizontal(nodes, 0)))
-          return true
+          return [true, "H1"]
         // second horizontal
         if (Utility.checkFull(Utility.pickThreeHorizontal(nodes, 3)))
-          return true
+          return [true, "H2"]
         // third horizontal
         if (Utility.checkFull(Utility.pickThreeHorizontal(nodes, 6)))
-          return true
+          return [true, "H3"]
         // first vertical
         if (Utility.checkFull(Utility.pickThreeVertical(nodes, 0)))
-          return true
+          return [true, "V1"]
         // second vertical
         if (Utility.checkFull(Utility.pickThreeVertical(nodes, 1)))
-          return true
+          return [true, "V2"]
         // third vertical
         if (Utility.checkFull(Utility.pickThreeVertical(nodes, 2)))
-          return true
+          return [true, "V3"]
         // first diag
         if (Utility.checkFull([nodes[0], nodes[4], nodes[8]]))
-          return true
+          return [true, "D1"]
         // second diag
         if (Utility.checkFull([nodes[2], nodes[4], nodes[6]]))
-          return true
-        return false
+          return [true, "D2"]
+        return [false, ""]
+      }
+
+      static isThereWinner = () => {
+        return Utility.isThereWinnerFull()[0]
       }
 
       static isThereStalemate = () => {
@@ -282,7 +316,19 @@
               each.remove("x")
             if (each.contains("o"))
               each.remove("o")
+            if (each.contains("win"))
+              each.remove("win")
           })
+        
+        // // reset all animation classes
+        // // Utility.winTypes
+        // ["x", "o", "win"]
+        //   .forEach(t => {
+        //     cellClasses.forEach(each => {
+        //       if (each.contains(t))
+        //         each.remove(t)
+        //     })
+        //   })
 
         ai.reset()
       }
@@ -360,6 +406,12 @@
           const winner = this.getIdOfWinner(this.xToPlay)
           const winnerDom = this.getDomOfWinner(winner)
           winnerDom.innerHTML = Utility.incrementDom(winnerDom)
+          const winType = Utility.isThereWinnerFull()[1]
+          const winNodesClass = Utility.getNodes(winType)
+
+          console.log(winType)
+          winNodesClass
+            .map(each => each.add("win"))
             /* fix bug when computers play changes from original when it loses */
           if (winner==="player")
             this.switchPlayer()
