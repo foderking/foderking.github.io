@@ -341,7 +341,6 @@
         const state  = boardState.map(mapFunc)
         const x = state.filter(each => each === "x").length
         const o = state.filter(each => each === "o").length
-        // console.log(x,o)
         return x === o ? "computer" : "player"
       }
 
@@ -416,18 +415,12 @@
       negaMax(boardState, validMoves, isBot, x=[]) {
         const isThereWin = Utility.isThereWinnerFull(each => each, boardState, Utility.serializedCheckFunc)
         const winner  = Utility.determineWinner(boardState)
-        // console.log(isThereWin, winner)
 
-        // if (isThereWin[0] && winner === "computer") {
         if (isThereWin[0]) {
           const evalScore = (winner === "computer") ^ isBot ? this.params.playerWins : this.params.botWins
           // console.log("eval score: ", evalScore, x)
           return [evalScore, x]
         }
-        // else if (isThereWin[0] && winner === "player") {
-        //   console.log("bot: ", "lose", x)
-        //   return [this.params.playerWins, x]
-        // }
         else if (!isThereWin[0] && boardState.filter(each => each !== "").length === 9) {
           // console.log("bot: ", "draw", x)
           return [this.params.staleMate, x]
@@ -461,7 +454,6 @@
         this.playerIsX = playerisx
         this.botResponseTime = 300
         this.ai = new Computer(playerisx ? "o" : "x", playerisx ? "x" : "o")
-
       }
 
       switchPlayer(){
@@ -510,20 +502,7 @@
         return this.ai.canStillPlay()
       }
 
-      // evaluateBoardState(boardState) {
-      //   let [win, winType] = Utility.isThereWinnerFull(each => each, Utility.serializeCells(), Utility.serializedCheckFunc)
-      //   console.log(win)
-        
-      //   if (!win || winType === "") 
-      //     return this.params.staleMate
-      //   else if (this.getIdOfWinner(win === "o") === "computer")
-      //     return this.params.botWins
-      //   else if (this.getIdOfWinner(win === "o") === "player")
-      //     return this.params.playerWins
-      //   throw "bad evaluation"
-      // }
-
-     renderMove(node, moveType, delayMove=false) {
+      renderMove(node, moveType, delayMove=false) {
         // delay move for bot
         if (delayMove) return setTimeout(() => this.renderMove(node, moveType), this.botResponseTime);
         // add animation class
