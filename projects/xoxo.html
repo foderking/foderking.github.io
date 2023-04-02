@@ -16,6 +16,19 @@
       --x-icon-size: calc(var(--o-icon-size) * 1.27);
       /* Thickness of x and o */
       --icon-border: calc(var(--o-icon-size) * 0.20);
+      --game-color: black;
+      --icon-color: black;
+    }
+    /* dark mode */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --game-color: rgb(210, 209, 209);
+        --icon-color: white;
+      }
+      body {
+        color: white;
+        background-color: black;
+      }
     }
     /* responsive shit */
     @media screen and (max-width:500px) {
@@ -44,19 +57,19 @@
 
     /* Set outline for the board */
     .left {
-      border-right: var(--cell-border) solid black;
+      border-right: var(--cell-border) solid var(--game-color);
     }
 
     .right {
-      border-left: var(--cell-border) solid black;
+      border-left: var(--cell-border) solid var(--game-color);
     }
 
     .up {
-      border-bottom: var(--cell-border) solid black;
+      border-bottom: var(--cell-border) solid var(--game-color);
     }
 
     .down {
-      border-top: var(--cell-border) solid black;
+      border-top: var(--cell-border) solid var(--game-color);
     }
 
     /* formatting for each cell */
@@ -89,7 +102,7 @@
     .x::after {
       position: absolute;
       content: "";
-      background-color: black;
+      background-color: var(--icon-color);
       border-radius: calc(var(--icon-border) / 4);
     }
 
@@ -110,7 +123,7 @@
       display: block;
       height: var(--o-icon-size);
       width: var(--o-icon-size);
-      border: var(--icon-border) solid black;
+      border: var(--icon-border) solid var(--icon-color);
       border-radius: 50%;
     }
 
@@ -294,9 +307,9 @@
         }
       }
 
-      static isThereWinnerFull = () => {
+      static isThereWinnerFull = (getFunc = (e) => e.classList, nodes = Utility.cellsDom, checkFunc = Utility.defaultCheckFunc) => {
         for (let eachType of Utility.winTypes) {
-          if (Utility.checkFull(Utility.getNodesFromType(eachType)))
+          if (Utility.checkFull(Utility.getNodesFromType(eachType, getFunc, nodes), checkFunc))
             return [true, eachType]
         }
         return [false, ""]
@@ -324,6 +337,14 @@
           && !Utility.isThereWinner()
       }
 
+      static determineWinner(boardState, mapFunc= each => each) {
+        const state  = boardState.map(mapFunc)
+        const x = state.filter(each => each === "x").length
+        const o = state.filter(each => each === "o").length
+        // console.log(x,o)
+        return x === o ? "computer" : "player"
+      }
+
       static isGameOver() {
         return Utility.isThereWinner() || Utility.isThereStalemate()
       }
@@ -337,8 +358,16 @@
     {
       static allIds = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
 
-      constructor() {
+      constructor(botType, playertype) {
         this.reset()
+        this.botType = botType
+        this.playerType = playertype
+        this.params = {
+          playerWins: -1,
+          botWins   :  1,
+          staleMate :  0,
+          botThreshold: 8
+        }
       }
 
       reset() {
@@ -351,14 +380,76 @@
         if (!this.freeSpaces.includes(playersMove)) throw "players move not found"
         this.freeSpaces = deleteMove(this.freeSpaces, playersMove) // removes players move from available moves
 
-        let nextMoveId = Math.floor(Math.random() * this.freeSpaces.length)
-        let nextMove = this.freeSpaces[nextMoveId]
+        const t = this.freeSpaces.length < this.params.botThreshold ? "minmax" : "random"
+        const nextMove = this.pickMove(this.freeSpaces, t)
         this.freeSpaces = deleteMove(this.freeSpaces, nextMove)  // removes computers move from available moves
         return nextMove
       }
 
+      pickMove(freeSpaces, pickType) {
+        switch(pickType)
+        {
+          case "minmax":
+            const minmaxResult = this.negaMax(Utility.serializeCells(), freeSpaces, true)
+            console.log(minmaxResult)
+            return minmaxResult[1][0][0]
+          case "random":
+            let nextMoveId = Math.floor(Math.random() * this.freeSpaces.length)
+            return this.freeSpaces[nextMoveId]
+          default: throw "not valid picktype"
+        }
+
+      }
+
       canStillPlay() {
         return !Utility.isGameOver() && this.freeSpaces.length > 1
+      }
+
+      makeMove(boardState, move, isBot) {
+        const index = Utility.cellDictionary[move] - 1
+        if (boardState[index] !== "") throw "error with board state"
+        const newState = boardState.slice()
+        newState[index] = isBot ? this.botType : this.playerType
+        return newState
+      }
+
+      negaMax(boardState, validMoves, isBot, x=[]) {
+        const isThereWin = Utility.isThereWinnerFull(each => each, boardState, Utility.serializedCheckFunc)
+        const winner  = Utility.determineWinner(boardState)
+        // console.log(isThereWin, winner)
+
+        // if (isThereWin[0] && winner === "computer") {
+        if (isThereWin[0]) {
+          const evalScore = (winner === "computer") ^ isBot ? this.params.playerWins : this.params.botWins
+          // console.log("eval score: ", evalScore, x)
+          return [evalScore, x]
+        }
+        // else if (isThereWin[0] && winner === "player") {
+        //   console.log("bot: ", "lose", x)
+        //   return [this.params.playerWins, x]
+        // }
+        else if (!isThereWin[0] && boardState.filter(each => each !== "").length === 9) {
+          // console.log("bot: ", "draw", x)
+          return [this.params.staleMate, x]
+        }
+        else {
+          let bestScore = Number.NEGATIVE_INFINITY
+          let bestMove = ""
+          let previousMoves = []
+          for (let move of validMoves) {
+            const newBoardState = this.makeMove(boardState, move, isBot)
+            const newValidMoves = validMoves.filter(each => each !== move)
+            const [score, tmp] = this.negaMax(newBoardState, newValidMoves, !isBot, x.concat([[move, isBot]]))
+            if ( (score * -1) > bestScore ) {
+              bestScore = (score * -1)
+              bestMove  = move
+              previousMoves = tmp
+            }
+          }
+          // console.log("score: ", bestScore, previousMoves, validMoves, isBot)
+          return [bestScore, previousMoves]
+        }
+
       }
 
     }
@@ -369,7 +460,8 @@
         this.xToPlay = playerisx
         this.playerIsX = playerisx
         this.botResponseTime = 300
-        this.ai = new Computer()
+        this.ai = new Computer(playerisx ? "o" : "x", playerisx ? "x" : "o")
+
       }
 
       switchPlayer(){
@@ -381,6 +473,7 @@
         this.switchPlayer()
         return nextPlayer
       }
+
 
       getIdOfWinner(winnerIsX){
         return winnerIsX ^ this.playerIsX ? "player" : "computer"
@@ -417,7 +510,20 @@
         return this.ai.canStillPlay()
       }
 
-      renderMove(node, moveType, delayMove=false) {
+      // evaluateBoardState(boardState) {
+      //   let [win, winType] = Utility.isThereWinnerFull(each => each, Utility.serializeCells(), Utility.serializedCheckFunc)
+      //   console.log(win)
+        
+      //   if (!win || winType === "") 
+      //     return this.params.staleMate
+      //   else if (this.getIdOfWinner(win === "o") === "computer")
+      //     return this.params.botWins
+      //   else if (this.getIdOfWinner(win === "o") === "player")
+      //     return this.params.playerWins
+      //   throw "bad evaluation"
+      // }
+
+     renderMove(node, moveType, delayMove=false) {
         // delay move for bot
         if (delayMove) return setTimeout(() => this.renderMove(node, moveType), this.botResponseTime);
         // add animation class
@@ -425,11 +531,13 @@
         if (Utility.isThereStalemate()) {
           this.switchPlayer()
           // increase draw counter if there is a draw
+          // console.log(game.evaluateBoardState(Utility.serializeCells()))
           Utility.drawDom.innerHTML = Utility.incrementDom(Utility.drawDom)
         }
         if (Utility.isThereWinner()) {
           //  increase winner counter if there is a winner
-          const winner = this.getIdOfWinner(this.xToPlay)
+
+          const winner = Utility.determineWinner(Utility.serializeCells())
           const winnerDom = this.getDomOfWinner(winner)
           winnerDom.innerHTML = Utility.incrementDom(winnerDom)
           // add animation class for winning
@@ -439,12 +547,12 @@
             .map(each => each.add("win"))
           console.log(winType)
 
-          console.log(
-            // Utility.cellsDom,
-            Utility.getNodesFromType(winType),
-            Utility.getNodesFromType(winType, each => each, Utility.serializeCells()),
-            Utility.checkFull(Utility.getNodesFromType(winType, each => each, Utility.serializeCells()), Utility.serializedCheckFunc)
-          )
+          // console.log(
+          //   // game.evaluateBoardState(Utility.serializeCells()),
+          //   Utility.getNodesFromType(winType),
+          //   Utility.getNodesFromType(winType, each => each, Utility.serializeCells()),
+          //   Utility.checkFull(Utility.getNodesFromType(winType, each => each, Utility.serializeCells()), Utility.serializedCheckFunc)
+          // )
             /* fix bug when computers play changes from original when it loses */
           if (winner==="player")
             this.switchPlayer()
@@ -469,7 +577,7 @@
       }
     }
 
-    const game = new Game(false)
+    const game = new Game(true)
 
     document.addEventListener("mousedown", event => {
       if (Utility.isGameOver()) {
