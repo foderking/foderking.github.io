@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>xoxo: play tictactoe</title>
   <style>
     :root {
       /* width and height of container */
@@ -236,6 +237,8 @@
     </div>
   </div>
 
+  <script src="/rxjs.umd.min.js">
+  </script>
   <script>
     class Utility
     {
@@ -329,8 +332,8 @@
         return Utility.isThereWinnerFull()[0]
       }
 
-      static isThereStalemate = () => {
-        return Utility.cellsDom
+      static isThereStalemate = (nodes = Utility.cellsDom) => {
+        return nodes
           .map(each => each.classList)
           .filter(each => !(each.contains("x") || each.contains("o")))
           .length <= 0
@@ -365,7 +368,7 @@
           playerWins: -1,
           botWins   :  1,
           staleMate :  0,
-          botThreshold: 8
+          botThreshold: 0
         }
       }
 
@@ -558,23 +561,88 @@
 
     const game = new Game(true)
 
-    document.addEventListener("mousedown", event => {
-      if (Utility.isGameOver()) {
-        game.resetState()
-      }
-      else {
-        let playerTargetNode = game.getValidPlayerMove(event)
-        if (!playerTargetNode) return
-        game.renderMove(playerTargetNode, game.getNextPlayer())
+    // document.addEventListener("mousedown", event => {
+    //   if (Utility.isGameOver()) {
+    //     game.resetState()
+    //     // game.ai.reset()
+    //   }
+    //   else {
+    //     let playerTargetNode = game.getValidPlayerMove(event)
+    //     if (!playerTargetNode) return
+    //     game.renderMove(playerTargetNode, game.getNextPlayer())
 
-        if (game.AICanStillPlay()) {
-          let targetNode = game.getValidComputerMove(playerTargetNode)
-          game.renderMove(targetNode, game.getNextPlayer(), true)
-        }
+    //     if (game.AICanStillPlay()) {
+    //       let targetNode = game.getValidComputerMove(playerTargetNode)
+    //       game.renderMove(targetNode, game.getNextPlayer(), true)
+    //     }
+    //   }
+    // })
+ 
+    const getParent  = event => event.parentNode
+    const getCells   = event => Array.from(getParent(event).children)
+    const renderMove = (targetNode, type) => targetNode.classList.add(type)
+
+    const filterAlreadyClicked   = (event) => !event.firstElementChild.classList.contains("x")
+                                            &&!event.firstElementChild.classList.contains("o")
+
+
+    const clickObservable = rxjs.fromEvent(document, "mousedown")
+    
+    const validClickObservable = rxjs
+      .merge(
+        clickObservable.pipe(
+          rxjs.filter(event => event.target.classList.contains("cells")),
+          rxjs.map(event => event.target)
+        ),
+        clickObservable.pipe(
+          rxjs.filter(event => event.target.parentNode.classList.contains("cells")),
+          rxjs.map(event => event.target.parentNode)
+        )
+      )
+    
+    const gameOverObservable = validClickObservable
+      .pipe(
+        rxjs.filter(Utility.isGameOver)
+      )
+    const validPlayerMoveObservable = validClickObservable
+      .pipe(
+        rxjs.filter(filterAlreadyClicked)
+      )
+
+    validClickObservable.subscribe(console.log)
+
+    gameOverObservable.subscribe((event) => {
+      console.log("game over")
+      getCells(event)
+        .map(each => each.firstElementChild.classList)
+        .map(each => {
+          if (each.contains("x"))
+            each.remove("x")
+          if (each.contains("o"))
+            each.remove("o")
+          if (each.contains("win"))
+            each.remove("win")
+          return each
+        })
+      game.ai.reset()
+    })
+
+    validPlayerMoveObservable.subscribe(event => {
+      // console.log(event)
+      console.log("valid")
+      const freeSpacesForComputer = getCells(event)
+        .map(each => each.firstElementChild)
+        .filter(each => !each.classList.contains("x") && !each.classList.contains("o"))
+        .length - 1
+
+      renderMove(event.firstElementChild, "x")
+
+      if (freeSpacesForComputer > 1) {
+        let computerTargetNode = game.getValidComputerMove(event.firstElementChild)
+        console.log(computerTargetNode, freeSpacesForComputer)
+        renderMove(computerTargetNode, "o")
       }
     })
-  </script>
-  <script src="/rxjs.umd.min.js">
   </script>
 </body>
 </html>
