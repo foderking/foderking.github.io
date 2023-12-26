@@ -237,7 +237,7 @@
     </div>
   </div>
 
-  <script src="/rxjs.umd.min.js">
+  <script src="/rx.js">
   </script>
   <script>
     class Utility
@@ -482,18 +482,6 @@
         }
       }
 
-      getValidPlayerMove(event) {
-        let sourceNode = event.target
-        // filter when cells arent clicked
-        if (!sourceNode.classList.contains("cells")) return null;
-
-        // filter when an invalid child node is clicked
-        let childNode = sourceNode.firstElementChild
-        if (!childNode) throw "error"
-        if (childNode.classList.contains("x") || childNode.classList.contains("o")) return null// move has already been played
-
-        return childNode
-      }
 
       getValidComputerMove(playerTargetNode){
           const playersMove = playerTargetNode.id
@@ -501,9 +489,9 @@
           return document.getElementById(aiMove)
       }
 
-      AICanStillPlay(){
-        return this.ai.canStillPlay()
-      }
+      // AICanStillPlay(){
+      //   return this.ai.canStillPlay()
+      // }
 
       renderMove(node, moveType, delayMove=false) {
         // delay move for bot
@@ -541,42 +529,9 @@
         }
 
       }
-
-      resetState() {
-        // reset all animation classes
-        Utility.cellsDom
-          .map(each => each.classList)
-          .forEach(each => {
-            if (each.contains("x"))
-              each.remove("x")
-            if (each.contains("o"))
-              each.remove("o")
-            if (each.contains("win"))
-              each.remove("win")
-          })
-        // reset computers state
-        this.ai.reset()
-      }
     }
 
     const game = new Game(true)
-
-    // document.addEventListener("mousedown", event => {
-    //   if (Utility.isGameOver()) {
-    //     game.resetState()
-    //     // game.ai.reset()
-    //   }
-    //   else {
-    //     let playerTargetNode = game.getValidPlayerMove(event)
-    //     if (!playerTargetNode) return
-    //     game.renderMove(playerTargetNode, game.getNextPlayer())
-
-    //     if (game.AICanStillPlay()) {
-    //       let targetNode = game.getValidComputerMove(playerTargetNode)
-    //       game.renderMove(targetNode, game.getNextPlayer(), true)
-    //     }
-    //   }
-    // })
  
     const getParent  = event => event.parentNode
     const getCells   = event => Array.from(getParent(event).children)
@@ -586,28 +541,48 @@
                                             &&!event.firstElementChild.classList.contains("o")
 
 
+    const getNumberOfFreeCells = event =>  getCells(event)
+        .map(each => each.firstElementChild)
+        .filter(each => !each.classList.contains("x") && !each.classList.contains("o"))
+        .length
+
     const clickObservable = rxjs.fromEvent(document, "mousedown")
     
     const validClickObservable = rxjs
       .merge(
         clickObservable.pipe(
           rxjs.filter(event => event.target.classList.contains("cells")),
-          rxjs.map(event => event.target)
+          rxjs.map(event => event.target), rxjs.share()
         ),
         clickObservable.pipe(
-          rxjs.filter(event => event.target.parentNode.classList.contains("cells")),
-          rxjs.map(event => event.target.parentNode)
+          rxjs.filter(event => 
+            event.target.parentNode.classList && 
+            event.target.parentNode.classList.contains("cells")
+          ),
+          rxjs.map(event => event.target.parentNode), rxjs.share()
         )
       )
     
-    const gameOverObservable = validClickObservable
-      .pipe(
-        rxjs.filter(Utility.isGameOver)
+    // const gameOverObservable = validClickObservable
+    //   .pipe(
+    //     rxjs.filter(Utility.isGameOver)
+    //   )
+    // const validPlayerMoveObservable = validClickObservable
+    //   .pipe(
+    //     rxjs.filter(filterAlreadyClicked)
+    //   )
+    
+    const [gameOverObservable, notGameOverObservable]= rxjs
+      .partition(
+        validClickObservable,
+        // Utility.isGameOver
+        node => { 
+          // console.log("node", getCells(node), getNumberOfFreeCells(node))
+          return getNumberOfFreeCells(node) === 0
+        }
       )
-    const validPlayerMoveObservable = validClickObservable
-      .pipe(
-        rxjs.filter(filterAlreadyClicked)
-      )
+    
+    const validPlayerMoveObservable = notGameOverObservable.pipe(rxjs.filter(filterAlreadyClicked))
 
     validClickObservable.subscribe(console.log)
 
@@ -616,13 +591,14 @@
       getCells(event)
         .map(each => each.firstElementChild.classList)
         .map(each => {
-          if (each.contains("x"))
-            each.remove("x")
-          if (each.contains("o"))
-            each.remove("o")
-          if (each.contains("win"))
-            each.remove("win")
-          return each
+          // if (each.contains("x"))
+            // each.remove("x")
+          // if (each.contains("o"))
+          //   each.remove("o")
+          // if (each.contains("win"))
+          //   each.remove("win")
+          // return each
+          each.remove("x","o","win")
         })
       game.ai.reset()
     })
@@ -630,17 +606,14 @@
     validPlayerMoveObservable.subscribe(event => {
       // console.log(event)
       console.log("valid")
-      const freeSpacesForComputer = getCells(event)
-        .map(each => each.firstElementChild)
-        .filter(each => !each.classList.contains("x") && !each.classList.contains("o"))
-        .length - 1
+      const freeSpacesForComputer = getNumberOfFreeCells(event) - 1
 
       renderMove(event.firstElementChild, "x")
 
       if (freeSpacesForComputer > 1) {
-        let computerTargetNode = game.getValidComputerMove(event.firstElementChild)
-        console.log(computerTargetNode, freeSpacesForComputer)
-        renderMove(computerTargetNode, "o")
+        const computerTargetNode = game.getValidComputerMove(event.firstElementChild)
+        // console.log(computerTargetNode, freeSpacesForComputer)
+        return setTimeout(() => renderMove(computerTargetNode, "o"), 300)
       }
     })
   </script>
