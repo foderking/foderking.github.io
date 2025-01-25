@@ -1,9 +1,92 @@
+:root{
+    --foreground: #343a40;
+}
+
 html {
-    font-family: sans-serif;
-    margin: 0 5rem;
+    /* font-family: sans-serif; */
     background-color: rgb(238, 239, 239);
+    color: var(--foreground);
+}
+@media(min-width: 1024){
+    html{
+        max-width: 1024px;
+    }
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.5;
+    max-width: 1024px;
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    padding: 2rem;
 }
 
 h1 {
+    font-size: 2.5rem;
     text-align: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #6c757d;
+}
+
+h1,h2,h3,h4,h5{
+    font-family: Arial, sans-serif;
+    text-transform: uppercase;
+}
+
+/* Paragraphs */
+p {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.1rem;
+    text-align: justify;
+}
+
+/* Bolded text inside divs */
+div b {
+    font-size: 1.2rem;
+    color: #495057;
+    text-transform: uppercase;
+    margin-top: 1rem;
+    display: inline-block;
+}
+
+/* Lists */
+ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+ul li {
+    margin-bottom: 0.5rem;
+}
+
+/* Links */
+a {
+    color: #007bff; /* Bootstrap blue */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+body {
+}
+
+@media (max-width: 768px) {
+    html{
+        margin: 0rem 0rem; 
+    }
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.6rem;
+    }
+
+    h3 {
+        font-size: 1.2rem;
+    }
 }
