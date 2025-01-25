@@ -1,0 +1,48 @@
+<html>
+<head>
+    <link rel="stylesheet" href="/blog.css">
+</head>
+<body>
+    <h1>WHEELIE</h1>
+
+    <h2>1. INTRODUCTION</h2>
+    <p>Wheelie is a two-wheeled self-balancing robot. It is my first hardware project, which I started to get myself familiar with building robotics hardware, and the implementation of control theory.</p>
+    <p>It is fundamentally an inverted pendulum with an actuator at the bottom, which is also known as a cart-pole. The aim is for the actuator to keep the inverted pendulum perfectly vertical which is a control problem.</p>
+    <h3>1.1. Components of Wheelie: Sensors</h3>
+    <p>In order to &quot;control&quot; the orientation of the robot, you will need to be able to know the orientation in the first place - that&apos;s where the sensors come in. </p>
+    <p>There are different devices which sense different things, and there are different ways to use those things to get the orientation. </p>
+
+    <div><b>Gyroscopes</b></div>
+    <p>One way is to use a gyroscope which senses the angular velocity in the body frame. You could integrate this to get the angular orientation, but there a problem with this approach: drift.</p>
+    <p>If you leave a robot at rest for a period of time, you will expect the measured orientation to remain constant because it is at rest, but when integrating gyroscope measurements to get angular orientation, you’ll notice the measured orientation keeps gradually increasing even when the robot is at rest. The phenomenon is gyroscope drift.</p>
+    <p>There’s a bunch of reason why drift occurs.</p>
+    <ul>
+    <li>There is a bias error in the angular velocity measured from the gyroscope. If the robot is at rest, you’ll expect the angular velocity to be 0, but the measured value from the gyroscope would likely be non-zero. This occurs because... reason. Anyways, this can be easily fixed/greatly reduced by calibrating the gyroscope.</li>
+    <li>Also, you’d expect there to be noise in the measurements from the gyroscope. Normally you’ll expect the mean to be 0 since it is white noise, but that doesn’t actually happen, you’ll expect random walks (idk wtf I’m talking about)</li>
+    <li>etc</li>
+    </ul>
+    <p>So, all these stuff causes drift in gyroscopes, are there better alternatives?</p>
+
+    <div><b>Accelerometers</b></div>
+    <p>Another way we can estimate orientation is to use a device called an accelerometer. An accelerometer measures the linear acceleration in the body frame.</p>
+    <p>Thanks to maths, there’s a random equation you can use to estimate the orientation from the acceleration measurements.</p>
+    <p>A benefit of using an accelerometer to measure orientation is that it doesn’t have drift like a gyroscope. Great! We now have an error free way of measuring orient- not so fast! Although an accelerometer doesn’t have drift like a gyroscope, it has a very big noise problem. The estimated orientation would have a lot of noise. </p>
+    <p>Okay accelerometers are no good either. Is there any hope for a common man who just want make robot go brr?</p>
+
+    <div><b>Sensor Fusion</b></div>
+    <p>Yes, yes there is still hope. Let&apos;s revisit the last two sensors. Gyroscopes give inaccurate measurements in the long term due to drift, but relatively accurate measurements in the short term. Accelerometers give inaccurate measurements in the short terms because they are very susceptible to noise, but in the long term, they should give relatively accurate measurements since the mean effect of the noise should be zero. Imagine if we could take advantage of this disparity and use gyroscopes measurements in the short term, while switching to accelerometers in the long term?</p>
+    <p>That&apos;s called sensor fusion. A more technical way of understanding sensor fusion is to think of the accelerometer and gyroscope measurements in terms of the frequency response. For the gyroscope, the drift changes very slowly, so the drift error occurs at low frequencies. For the accelerometer, the noise usually changes very fast, so that would occur at high frequencies. Imagine if we take a low pass filter for the accelerometer to remove the high frequency noise, and take a high pass filter for the gyroscope to get rid of the low frequency drift, and add the resulting signals. That would give a relatively good measurement of orientation.</p>
+    <p>That&apos;s basically the gist of sensor fusion. There are different ways of doing sensor fusion: complementary filters, Kalman filters etc. The best filter to use depends on your use-case really. But Kalman filters are probably objectively the best way, since they are the optimal way of doing it. Optimal in the sense that a Kalman filter minimizes the error between output reading and the actual reading.</p>
+
+    <h3>1.2.	Components of Wheelie: Actuator</h3>
+    <p>Once you know the orientation of the robot, you&apos;ll need something to correct the orientation if it is straying for the desired one.</p>
+    <p>A typical way to do this is to use a motor. But there are different types of motors which their different strengths.</p>
+    <p>Brushed motors, Brushless motors, Servo motors (basically same as first two, but with closed loop feedback), stepper motors.</p>
+
+    <h3>1.3.	Components of Wheelie: Controller</h3>
+    <p>This the brain of the system. It coordinates everything required for the robot to work. It coordinates taking measurements from the sensors, calculating the desired command to give to the actuators, and other important stuff.</p>
+    <h2>2.	BUILDING WHEELIE</h2>
+    <h3>2.1. Setting up the MPU6050</h3>
+
+</body>
+</html>
