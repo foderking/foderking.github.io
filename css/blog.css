@@ -108,3 +108,8 @@ figure > figcaption {
     text-align: center;
     color: #8e9091;
 }
+
+.todo{
+    background-color: rgba(255, 0, 0, 0.522);
+    color:white;
+}

@@ -61,7 +61,7 @@
         <img src="/img/mpu_6050_img.jpg" alt="mpu 6050 picture" style="height: 400px;"/>
         <figcaption>The MPU 6050</figcaption>
     </figure>
-    #TODO add schematic of setup
+    <span class="todo">#TODO add schematic of setup</span>
 
 
     <h4>2.1.2 Reading measurements from the mpu6050</h4>
@@ -73,7 +73,7 @@
     </figure>
 
     <h4>2.1.3 Hello MPU 6050?</h4>
-    <p>I tested if the mpu 6050 was working, but the arduino wasn't finding it</p>
+    <p>I tested if the mpu 6050 was working, but the arduino wasn&apos;t finding it</p>
     <figure>
         <img src="/img/whelie_first_try.jpg" alt="initial code" style="width: 100%;">
         <figcaption>I2C device not found</figcaption>
@@ -87,18 +87,18 @@
 
     <h4>2.1.4 Switching to a library</h4>
     <p>Initially, I wrote the drivers for the mpu 6050 myself, but I wanted to make use of the Digital Motion Processor to automatically calculate angles, instead of writing something like a kalman filter myself.</p>
-    <p>The problem is that the DMP features aren't documented, and are only really accessible through Invensense&apos;s proprietary software, so I made use of <a href="http://www.i2cdevlib.com/devices/mpu6050#source">a popular library</a> that had already done all of the work of reverse engineering Invensense&apos;s software</p>
+    <p>The problem is that the DMP features aren&apos;t documented, and are only really accessible through Invensense&apos;s proprietary software, so I made use of <a href="http://www.i2cdevlib.com/devices/mpu6050#source">a popular library</a> that had already done all of the work of reverse engineering Invensense&apos;s software</p>
 
     <h4>2.1.5 New Setup</h4>
     <p>I changed the setup to make use of interrupts</p>
-    #TODO add schematic for setup
+    <span class="todo">#TODO add schematic for setup</span>
     <p>Here are some measurements I was able to take.</p>
     <figure>
         <img src="/img/mpu6050_readings_1.png" alt="sample mpu 6050 readings" style="width: 100%;">
         <figcaption>Sample mpu 6050 readings</figcaption>
     </figure>
     <p>Also, after much trouble trying to get matplotlib GUI to work in wsl, I was able to write a cool python script to plot the measurements from the MPU 6050 in realtime</p>
-    #TODO add video 
+    <span class="todo">#TODO add video </span>
 
     <h4>2.1.6 Problem #1: I2C hanging</h4>
     <p>I noticed after a few minutes, I stopped recieving serial outputs from the arduino.</p>
@@ -110,7 +110,31 @@
         <li>Adding a timeout on arduino with <code>Wire.setWireTimeout(3000, true);</code></li>
     </ol>
     <p>Suprisingly, once I reduced the sample rate back to 9800, the problem disappeared</p>
+    <span class="todo"># TODO new setup</span>
 
     <h4>2.1.7 Problem #2: Random spikes</h4>
+    <p>I also noticed there were random large spikes in the readings from the accelerometer and gyroscope when I left it at rest for a while.</p>
+    <figure>
+        <img src="/img/mpu6050_spikes.png" alt="mpu 6050 spikes" style="width: 100%;">
+        <figcaption>Spikes from gyroscope (bottom) and accelerometer (top)</figcaption>
+    </figure>
+    <p>For the accelerometer, I noticed there was a lot of noise on the x-axis measurements and a bunch of small spikes, but for the y, and z axis, the was less noise, but larger spikes</p>
+    <figure>
+        <img src="/img/mpu_6050_accel_spikes_1.jpg" alt="accelerometer x axis spikes" style="width: 70%;">
+        <figcaption>accelerometer x axis spikes</figcaption>
+    </figure>
+    <figure>
+        <img src="/img/mpu_6050_accel_spikes_2.jpg" alt="accelerometer y and axis spikes" style="width: 70%;">
+        <figcaption>accelerometer y and z axis spikes</figcaption>
+    </figure>
+    <p>For the gyroscope, there wasn&apos;t much noise or spikes on the x-axis, but the spikes on the y axis were all in the ±250+ range, and the z axis spikes were all 255 or -258...</p>
+    <figure>
+        <img src="/img/gyro_spikes_1.jpg" alt="gyro y axis spikes" style="width: 70%;">
+        <figcaption>gyroscope y axis spikes</figcaption>
+    </figure>
+    <figure>
+        <img src="/img/gyro_spikes_2.jpg" alt="gyro z axis spikes" style="width: 70%;">
+        <figcaption>gyroscope z axis spikes</figcaption>
+    </figure>
 </body>
 </html>
